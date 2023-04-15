@@ -1,0 +1,31 @@
+﻿@page
+@model Assettmanagement.Pages.Admin.IndexModel
+
+<h1>Admin Page</h1>
+
+<h2>Add Asset</h2>
+<form method="post">
+    <input asp-for="NewAsset.ItemName" placeholder="Item Name" />
+    <input asp-for="NewAsset.Description" placeholder="Description" />
+    <input asp-for="NewAsset.SerialNumber" placeholder="Serial Number" />
+    <input asp-for="NewAsset.AssetNumber" placeholder="Asset Number" />
+    <input asp-for="NewAsset.Location" placeholder="Location" />
+    <button type="submit" asp-page-handler="AddAsset">Add Asset</button>
+</form>
+
+<h2>Assets</h2>
+<table>
+    <!-- Add table header and rows for assets -->
+</table>
+
+<h2>Add User</h2>
+<form method="post">
+    <input asp-for="NewUser.FirstName" placeholder="First Name" />
+    <input asp-for="NewUser.LastName" placeholder="Last Name" />
+    <button type="submit" asp-page-handler="AddUser">Add User</button>
+</form>
+
+<h2>Users</h2>
+<table>
+    <!-- Add table header and rows for users -->
+</table>

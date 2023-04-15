@@ -1,0 +1,22 @@
+﻿@page
+@model Assettmanagement.Pages.Booking.IndexModel
+@{
+}
+<h1>Booking Page</h1>
+<h2>Select Asset and User</h2>
+<form method="post">
+    <select asp-for="SelectedAssetId" asp-items="@(new SelectList(Model.Assets, "Id", "ItemName"))"></select>
+    <select asp-for="SelectedUserId" asp-items="@(new SelectList(Model.Users, "Id", "FullName"))"></select>
+    <button type="submit" asp-page-handler="BookAsset">Book Asset</button>
+    <button type="submit" asp-page-handler="ReturnAsset">Return Asset</button>
+</form>
+
+<h2>Assets</h2>
+<table>
+    <!-- Add table header and rows for assets -->
+</table>
+
+<h2>Users</h2>
+<table>
+    <!-- Add table header and rows for users -->
+</table>
