@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Assettmanagement.Data;
 using Assettmanagement.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -17,54 +19,47 @@ namespace Assettmanagement.Pages.Admin
         public List<Asset> Assets { get; set; }
         public List<User> Users { get; set; }
 
+        [BindProperty]
+        public int SelectedAssetId { get; set; }
+
+        [BindProperty]
+        public int SelectedUserId { get; set; }
+
+        [TempData]
+        public string ResultMessage { get; set; }
+
         public async Task OnGetAsync()
         {
             Assets = await _dataAccess.GetAssetsAsync();
             Users = await _dataAccess.GetUsersAsync();
         }
 
-        [BindProperty]
-        public Asset NewAsset { get; set; }
-
-        [BindProperty]
-        public User NewUser { get; set; }
-
-        public async Task<IActionResult> OnPostAddAssetAsync()
+        public async Task<IActionResult> OnPostDeleteAssetAsync()
         {
-       //     if (ModelState.IsValid)
+            try
             {
-                try
-                {
-                    await _dataAccess.AddAssetAsync(NewAsset);
-                    TempData["Message"] = "Asset added successfully!";
-                }
-                catch (Exception ex)
-                {
-                    TempData["Message"] = $"Error adding asset: {ex.Message}";
-                }
+                await _dataAccess.DeleteAssetAsync(SelectedAssetId);
+                ResultMessage = "Asset deleted successfully!";
+            }
+            catch (System.Exception ex)
+            {
+                ResultMessage = $"Error deleting asset: {ex.Message}";
             }
 
             return RedirectToPage();
         }
 
-        public async Task<IActionResult> OnPostAddUserAsync()
+        public async Task<IActionResult> OnPostDeleteUserAsync()
         {
-            //if (ModelState.IsValid)
+            try
             {
-                try
-                {
-                    await _dataAccess.AddUserAsync(NewUser);
-                    TempData["Message"] = "User added successfully!";
-                }
-                catch (Exception ex)
-                {
-                    TempData["Message"] = $"Error adding user: {ex.Message}";
-                }
+                await _dataAccess.DeleteUserAsync(SelectedUserId);
+                ResultMessage = "User deleted successfully!";
             }
-          //  else
-          //  {
-          //      TempData["Message"] = $"Error adding user";
-          //  }
+            catch (System.Exception ex)
+            {
+                ResultMessage = $"Error deleting user: {ex.Message}";
+            }
 
             return RedirectToPage();
         }

@@ -1,0 +1,50 @@
+﻿@page
+@model Assettmanagement.Pages.Admin.AddAssetModel
+@{
+    ViewData["Title"] = "Add Asset";
+}
+
+<h2>Add Asset</h2>
+
+<form method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-group">
+        <label asp-for="Asset.Name">Asset Name</label>
+        <input asp-for="Asset.Name" class="form-control" />
+        <span asp-validation-for="Asset.Name" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Asset.Description">Description</label>
+        <input asp-for="Asset.Description" class="form-control" />
+        <span asp-validation-for="Asset.Description" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Asset.SerialNumber">Serial Number</label>
+        <input asp-for="Asset.SerialNumber" class="form-control" />
+        <span asp-validation-for="Asset.SerialNumber" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Asset.AssetNumber">Asset Number</label>
+        <input asp-for="Asset.AssetNumber" class="form-control" />
+        <span asp-validation-for="Asset.AssetNumber" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Asset.Location">Location</label>
+        <input asp-for="Asset.Location" class="form-control" />
+        <span asp-validation-for="Asset.Location" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Asset</button>
+</form>
+
+@if (!string.IsNullOrEmpty(Model.ResultMessage))
+{
+    <div class="alert alert-info mt-3">@Model.ResultMessage</div>
+}
+
+<a asp-page="./Index">Back to Admin</a>
