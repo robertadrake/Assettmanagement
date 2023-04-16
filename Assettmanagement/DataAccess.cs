@@ -33,7 +33,7 @@ namespace Assettmanagement.Data
                                 SerialNumber = reader.GetString(3),
                                 AssetNumber = reader.GetString(4),
                                 Location = reader.GetString(5),
-                                //BookedOutTo = reader.IsDBNull(6) ? null : reader.GetInt32(6)
+                                UserId = reader.GetInt32(6)
                             });
                         }
                     }
@@ -63,7 +63,7 @@ namespace Assettmanagement.Data
                                 SerialNumber = reader.GetString(3),
                                 AssetNumber = reader.GetString(4),
                                 Location = reader.GetString(5),
-                                //BookedOutTo = reader.IsDBNull(6) ? null : reader.GetInt32(6)
+                                UserId = reader.IsDBNull(6) ? (int?)null : reader.GetInt32(6)
                             };
                         }
                     }
@@ -84,6 +84,7 @@ namespace Assettmanagement.Data
                     command.Parameters.AddWithValue("@serialNumber", asset.SerialNumber);
                     command.Parameters.AddWithValue("@assetNumber", asset.AssetNumber);
                     command.Parameters.AddWithValue("@location", asset.Location);
+                    command.Parameters.AddWithValue("@UserId", asset.UserId);
                     // command.Parameters.AddWithValue("@bookedOutTo", (object)asset.BookedOutTo ?? DBNull.Value);
 
                     await command.ExecuteNonQueryAsync();
@@ -138,6 +139,20 @@ namespace Assettmanagement.Data
                     command.Parameters.AddWithValue("@firstName", user.FirstName);
                     command.Parameters.AddWithValue("@lastName", user.LastName);
 
+                    await command.ExecuteNonQueryAsync();
+                }
+            }
+        }
+
+        public async Task UpdateUserAsync(User user)
+        {
+            using (var connection = _accessDatabase.GetConnection())
+            {
+                using (var command = new SqliteCommand(@"UPDATE Users SET FirstName = @FirstName, LastName = @LastName, WHERE Id = @Id;", connection))
+                {
+                    command.Parameters.AddWithValue("@firstName", user.FirstName);
+                    command.Parameters.AddWithValue("@lastName", user.LastName);
+                    command.Parameters.AddWithValue("@Id", user.Id);
                     await command.ExecuteNonQueryAsync();
                 }
             }
@@ -263,5 +278,107 @@ namespace Assettmanagement.Data
                   }
               }
           }
+
+
+        public async Task<List<Asset>> GetAssignedAssetsByUserAsync(int userId)
+        {
+            using (var connection = _accessDatabase.GetConnection())
+            {
+                var assets = new List<Asset>();
+
+                using (var command = new SqliteCommand("SELECT * FROM Assets WHERE UserId = @UserId", connection))
+                {
+                    command.Parameters.AddWithValue("@UserId", userId);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            assets.Add(new Asset
+                            {
+                                Id = reader.GetInt32(0),
+                                Name = reader.GetString(1),
+                                Description = reader.GetString(2),
+                                SerialNumber = reader.GetString(3),
+                                AssetNumber = reader.GetString(4),
+                                Location = reader.GetString(5),
+                                UserId = reader.IsDBNull(6) ? null : reader.GetInt32(6)
+                            });
+                        }
+                    }
+                }
+
+                return assets;
+            }
+        }
+
+        public async Task<User> GetUserAsync(int userId)
+        {
+            using (var connection = _accessDatabase.GetConnection())
+            {
+                User user = null;
+
+                using (var command = new SqliteCommand("SELECT * FROM Users WHERE Id = @UserId", connection))
+                {
+                    command.Parameters.AddWithValue("@UserId", userId);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            user = new User
+                            {
+                                Id = reader.GetInt32(0),
+                                FirstName = reader.GetString(1),
+                                LastName = reader.GetString(2),
+                            };
+                        }
+                    }
+                }
+
+                return user;
+            }
+        }
+
+
+
+        public async Task<List<Asset>> GetAssetsWithUsersAsync()
+        {
+            using (var connection = _accessDatabase.GetConnection())
+            {
+                var assets = new List<Asset>();
+
+                using (var command = new SqliteCommand("SELECT a.*, u.* FROM Assets a LEFT JOIN Users u ON a.UserId = u.Id", connection))
+                {
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            assets.Add(new Asset
+                            {
+                                Id = reader.GetInt32(0),
+                                Name = reader.GetString(1),
+                                Description = reader.GetString(2),
+                                SerialNumber = reader.GetString(3),
+                                AssetNumber = reader.GetString(4),
+                                Location = reader.GetString(5),
+                                UserId = reader.IsDBNull(6) ? null : reader.GetInt32(6),
+                                User = reader.IsDBNull(7) ? null : new User
+                                {
+                                    Id = reader.GetInt32(7),
+                                    FirstName = reader.GetString(8),
+                                    LastName = reader.GetString(9),
+                                }
+                            });
+                        }
+                    }
+                }
+
+                return assets;
+            }
+        }
+
     }
+
+
 }

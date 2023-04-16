@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Assettmanagement.Data;
+using Assettmanagement.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Assettmanagement.Pages
@@ -6,15 +10,15 @@ namespace Assettmanagement.Pages
     public class IndexModel : PageModel
     {
         private readonly ILogger<IndexModel> _logger;
-
-        public IndexModel(ILogger<IndexModel> logger)
+        private readonly DataAccess _dataAccess;
+        public IndexModel(DataAccess dataAccess)
         {
-            _logger = logger;
+            _dataAccess = dataAccess;
         }
-
-        public void OnGet()
+        public List<Asset> Assets { get; set; }
+        public async Task OnGetAsync()
         {
-
+            Assets = await _dataAccess.GetAssetsWithUsersAsync();
         }
     }
 }

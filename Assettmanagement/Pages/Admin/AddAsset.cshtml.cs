@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using Assettmanagement.Data;
-
 using Assettmanagement.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -31,7 +30,7 @@ namespace Assettmanagement.Pages.Admin
         {
             if (!ModelState.IsValid)
             {
-                return Page();
+            //    return Page();
             }
 
             try
@@ -44,7 +43,7 @@ namespace Assettmanagement.Pages.Admin
                 ResultMessage = $"Error adding asset: {ex.Message}";
             }
 
-            return RedirectToPage("./Index");
+           return RedirectToPage("./Index");
         }
     }
 }

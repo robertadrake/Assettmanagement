@@ -28,37 +28,41 @@ namespace Assettmanagement.Pages.Admin
         [TempData]
         public string ResultMessage { get; set; }
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
-            Assets = await _dataAccess.GetAssetsAsync();
+            Assets = await _dataAccess.GetAssetsWithUsersAsync();
             Users = await _dataAccess.GetUsersAsync();
+
+            return Page();
         }
 
-        public async Task<IActionResult> OnPostDeleteAssetAsync()
+        public async Task<IActionResult> OnPostDeleteAssetAsync(int id)
         {
-            try
-            {
-                await _dataAccess.DeleteAssetAsync(SelectedAssetId);
-                ResultMessage = "Asset deleted successfully!";
-            }
-            catch (System.Exception ex)
-            {
-                ResultMessage = $"Error deleting asset: {ex.Message}";
-            }
+            var asset = await _dataAccess.GetAssetAsync(id);
 
+            if (asset.UserId != null)
+            {
+                TempData["ErrorMessage"] = $"Cannot delete asset '{asset.Name}' as it is assigned to user '{asset.User.FirstName} {asset.User.LastName}'. Unassign the asset before deleting.";
+                return RedirectToPage();
+            }                                              
+
+            await _dataAccess.DeleteAssetAsync(id);
             return RedirectToPage();
         }
 
-        public async Task<IActionResult> OnPostDeleteUserAsync()
+        public async Task<IActionResult> OnPostDeleteUserAsync(int selectedUserId)
         {
-            try
+            var user = await _dataAccess.GetUserAsync(selectedUserId); 
+            var assignedAssets = await _dataAccess.GetAssignedAssetsByUserAsync(selectedUserId);
+
+            if (assignedAssets.Count > 0)
             {
-                await _dataAccess.DeleteUserAsync(SelectedUserId);
-                ResultMessage = "User deleted successfully!";
+                ResultMessage = $"User '{user.FirstName} {user.LastName}' has the following assets assigned: {string.Join(", ", assignedAssets.Select(a => a.Name))}. Unassign the assets before deleting the user.";
             }
-            catch (System.Exception ex)
+            else
             {
-                ResultMessage = $"Error deleting user: {ex.Message}";
+                await _dataAccess.DeleteUserAsync(selectedUserId);
+                ResultMessage = "User deleted successfully.";
             }
 
             return RedirectToPage();

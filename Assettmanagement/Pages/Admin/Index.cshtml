@@ -4,22 +4,29 @@
     ViewData["Title"] = "Admin";
 }
 
-<h2>Admin</h2>
+<h1>Admin</h1>
 
-<div>
-    <a asp-page="./AddAsset" class="btn btn-primary">Add Asset</a>
-    <a asp-page="./AddUser" class="btn btn-primary">Add User</a>
-</div>
+<p>
+    <a asp-page="./AddAsset">Add Asset</a>
+    <a asp-page="./AddUser">Add User</a>
+</p>
 
-<h3>Assets</h3>
+@if (!string.IsNullOrEmpty(Model.ResultMessage))
+{
+    <div class="alert alert-info">@Model.ResultMessage</div>
+}
+
+<h2>Assets</h2>
 <table class="table">
     <thead>
         <tr>
+            <th>ID</th>
             <th>Name</th>
             <th>Description</th>
             <th>Serial Number</th>
             <th>Asset Number</th>
             <th>Location</th>
+            <th>Assigned To</th>
             <th>Action</th>
         </tr>
     </thead>
@@ -27,15 +34,26 @@
         @foreach (var asset in Model.Assets)
         {
             <tr>
+                <td>@asset.Id</td>
                 <td>@asset.Name</td>
                 <td>@asset.Description</td>
                 <td>@asset.SerialNumber</td>
                 <td>@asset.AssetNumber</td>
                 <td>@asset.Location</td>
                 <td>
+                    @if (asset.User != null)
+                    {
+                        @asset.User.FirstName @asset.User.LastName
+                    }
+                    else
+                    {
+                        @:Not assigned
+                    }
+                </td>
+                <td>
                     <form method="post" asp-page-handler="DeleteAsset">
                         <input type="hidden" asp-for="SelectedAssetId" value="@asset.Id" />
-                        <button type="submit" class="btn btn-danger">Delete</button>
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                     </form>
                 </td>
             </tr>
@@ -43,10 +61,11 @@
     </tbody>
 </table>
 
-<h3>Users</h3>
+<h2>Users</h2>
 <table class="table">
     <thead>
         <tr>
+            <th>ID</th>
             <th>First Name</th>
             <th>Last Name</th>
             <th>Action</th>
@@ -56,20 +75,16 @@
         @foreach (var user in Model.Users)
         {
             <tr>
+                <td>@user.Id</td>
                 <td>@user.FirstName</td>
                 <td>@user.LastName</td>
                 <td>
                     <form method="post" asp-page-handler="DeleteUser">
                         <input type="hidden" asp-for="SelectedUserId" value="@user.Id" />
-                        <button type="submit" class="btn btn-danger">Delete</button>
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                     </form>
                 </td>
             </tr>
         }
     </tbody>
 </table>
-
-@if (Model.ResultMessage != null)
-{
-    <div class="alert alert-info">@Model.ResultMessage</div>
-}

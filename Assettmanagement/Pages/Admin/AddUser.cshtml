@@ -4,8 +4,9 @@
     ViewData["Title"] = "Add User";
 }
 
-<h2>Add User</h2>
 
+<div class="container">
+<h2>Add User</h2>
 <form method="post">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -22,11 +23,22 @@
     </div>
 
     <button type="submit" class="btn btn-primary">Add User</button>
+    <button type="submit" asp-page-handler="ExportUsers" class="btn btn-primary">Export Users</button>
+    
 </form>
+
+
+    <form method="post" enctype="multipart/form-data" asp-page-handler="ImportUsers">
+        <div class="form-group">
+            <label for="importUsersFile">Import Users (CSV):</label>
+            <input type="file" id="importUsersFile" name="file" class="form-control-file" />
+        </div>
+        <button type="submit" class="btn btn-primary">Import Users</button>
+    </form>
 
 @if (!string.IsNullOrEmpty(Model.ResultMessage))
 {
     <div class="alert alert-info mt-3">@Model.ResultMessage</div>
 }
-
 <a asp-page="./Index">Back to Admin</a>
+</div>
