@@ -36,17 +36,25 @@ namespace Assettmanagement.Pages.Admin
             return Page();
         }
 
-        public async Task<IActionResult> OnPostDeleteAssetAsync(int id)
+        //public async Task<IActionResult> OnPostDeleteAssetAsync(int AssetId)
+        public async Task<IActionResult> OnPostDeleteAssetAsync(int? SelectedAssetId)
         {
-            var asset = await _dataAccess.GetAssetAsync(id);
+            if (SelectedAssetId != 0) { 
+                var asset = await _dataAccess.GetAssetAsync((int)SelectedAssetId);
 
-            if (asset.UserId != null)
+                if (asset.UserId != null)
+                {
+                    ResultMessage = $"Cannot delete asset '{asset.Name}' as it is assigned to a User. Unassign the asset before deleting.";
+                    return RedirectToPage();
+                }
+
+                await _dataAccess.DeleteAssetAsync((int)SelectedAssetId);
+                ResultMessage = "Asset deleted successfully.";
+            }
+            else
             {
-                TempData["ErrorMessage"] = $"Cannot delete asset '{asset.Name}' as it is assigned to user '{asset.User.FirstName} {asset.User.LastName}'. Unassign the asset before deleting.";
-                return RedirectToPage();
-            }                                              
-
-            await _dataAccess.DeleteAssetAsync(id);
+                ResultMessage = $"Asset ID is null : {SelectedAssetId}";
+            }
             return RedirectToPage();
         }
 

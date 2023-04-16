@@ -4,8 +4,12 @@
     ViewData["Title"] = "Add Asset";
 }
 
+<div class="container">
+    @if (!string.IsNullOrEmpty(Model.ResultMessage2))
+    {
+        <div class="alert alert-info">@Model.ResultMessage2</div>
+    }
 <h2>Add Asset</h2>
-
 <form method="post">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -40,11 +44,16 @@
     </div>
 
     <button type="submit" class="btn btn-primary">Add Asset</button>
+    <tl></tl>
+    <button type="submit" asp-page-handler="ExportAsset" class="btn btn-primary">Export Assets</button>
 </form>
 
-@if (!string.IsNullOrEmpty(Model.ResultMessage))
-{
-    <div class="alert alert-info mt-3">@Model.ResultMessage</div>
-}
-
+<form method="post" enctype="multipart/form-data" asp-page-handler="ImportAsset">
+    <div class="form-group">
+            <label for="ImportAsset">Import Assets (CSV):</label>
+            <input type="file" id="ImportAsset" name="file" class="form-control-file" />
+    </div>
+    <button type="submit" class="btn btn-primary">Import Assets</button>
+</form>
+</div>  
 <a asp-page="./Index">Back to Admin</a>

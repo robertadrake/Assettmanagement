@@ -33,7 +33,7 @@ namespace Assettmanagement.Data
                                 SerialNumber = reader.GetString(3),
                                 AssetNumber = reader.GetString(4),
                                 Location = reader.GetString(5),
-                                UserId = reader.GetInt32(6)
+                                UserId = reader.IsDBNull(6) ? (int?)null : reader.GetInt32(6)
                             });
                         }
                     }
@@ -378,7 +378,25 @@ namespace Assettmanagement.Data
             }
         }
 
+
+        public async Task UpdateAssetAsync(Asset asset)
+        {
+            using (var connection = _accessDatabase.GetConnection())
+            {
+                const string query = "UPDATE Assets SET Name = @Name, Description = @Description, SerialNumber = @SerialNumber, AssetNumber = @AssetNumber, Location = @Location, UserId = @UserId WHERE Id = @Id;";
+                using (var command = new SqliteCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id", asset.Id);
+                    command.Parameters.AddWithValue("@Name", asset.Name);
+                    command.Parameters.AddWithValue("@Description", asset.Description);
+                    command.Parameters.AddWithValue("@SerialNumber", asset.SerialNumber);
+                    command.Parameters.AddWithValue("@AssetNumber", asset.AssetNumber);
+                    command.Parameters.AddWithValue("@Location", asset.Location);
+                    command.Parameters.AddWithValue("@UserId", (object)asset.UserId ?? DBNull.Value);
+
+                    await command.ExecuteNonQueryAsync();
+                }
+            }
+        }
     }
-
-
 }

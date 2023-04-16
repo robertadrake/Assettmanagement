@@ -63,28 +63,6 @@ namespace Assettmanagement.Pages.Admin
             return File(stream, "text/csv", "users.csv");
         }
 
-        /*public async Task<IActionResult> OnPostImportUsersAsync(IFormFile file)
-        {
-            using (var reader = new StreamReader(file.OpenReadStream()))
-            {
-                var csvReader = new CsvReader(reader, CultureInfo.InvariantCulture);
-                var users = csvReader.GetRecords<User>().ToList();
-
-                // Delete existing users
-                foreach (var existingUser in await _dataAccess.GetUsersAsync())
-                {
-                    await _dataAccess.DeleteUserAsync(existingUser.Id);
-                }
-
-                // Add new users
-                foreach (var user in users)
-                {
-                    await _dataAccess.AddUserAsync(user);
-                }
-            }
-
-            return RedirectToPage();
-        }*/
         public async Task<IActionResult> OnPostImportUsersAsync()
         {
             if (File == null || File.Length == 0)
