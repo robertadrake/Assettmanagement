@@ -1,0 +1,45 @@
+﻿@page
+@model Assettmanagement.Pages.Booking.AssignAssetModel
+@{
+    ViewData["Title"] = "Assign Asset";
+}
+
+<h2>Assign Asset</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Asset Name</th>
+            <th>Asset Number</th>
+            <th>Assign To</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var asset in Model.AvailableAssets)
+        {
+            <tr>
+                <td>@asset.Name</td>
+                <td>@asset.AssetNumber</td>
+                <td>
+                    <form method="post" asp-page-handler="Assign">
+                        <input type="hidden" asp-for="SelectedAssetId" value="@asset.Id" />
+                        <select asp-for="SelectedUserId">
+                            <option value="">Select user</option>
+                            @foreach (var user in Model.Users)
+                            {
+                                <option value="@user.Id">@user.FirstName @user.LastName</option>
+                            }
+                        </select>
+                        <button type="submit" class="btn btn-primary">Assign Asset</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (Model.ResultMessage != null)
+{
+    <div class="alert alert-info">@Model.ResultMessage</div>
+}

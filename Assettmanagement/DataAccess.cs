@@ -1,11 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Data;
-using System.Threading.Tasks;
-using Assettmanagement.Database;
+﻿using Assettmanagement.Database;
 using Assettmanagement.Models;
 using Microsoft.Data.Sqlite;
-using Assettmanagement.Database;
-using Assettmanagement.Models;
 
 namespace Assettmanagement.Data
 {
@@ -33,12 +28,12 @@ namespace Assettmanagement.Data
                             assets.Add(new Asset
                             {
                                 Id = reader.GetInt32(0),
-                                ItemName = reader.GetString(1),
+                                Name = reader.GetString(1),
                                 Description = reader.GetString(2),
                                 SerialNumber = reader.GetString(3),
                                 AssetNumber = reader.GetString(4),
                                 Location = reader.GetString(5),
-                                BookedOutTo = reader.IsDBNull(6) ? null : reader.GetInt32(6)
+                                //BookedOutTo = reader.IsDBNull(6) ? null : reader.GetInt32(6)
                             });
                         }
                     }
@@ -63,12 +58,12 @@ namespace Assettmanagement.Data
                             asset = new Asset
                             {
                                 Id = reader.GetInt32(0),
-                                ItemName = reader.GetString(1),
+                                Name = reader.GetString(1),
                                 Description = reader.GetString(2),
                                 SerialNumber = reader.GetString(3),
                                 AssetNumber = reader.GetString(4),
                                 Location = reader.GetString(5),
-                                BookedOutTo = reader.IsDBNull(6) ? null : reader.GetInt32(6)
+                                //BookedOutTo = reader.IsDBNull(6) ? null : reader.GetInt32(6)
                             };
                         }
                     }
@@ -82,14 +77,14 @@ namespace Assettmanagement.Data
         {
             using (var connection = _accessDatabase.GetConnection())
             {
-                using (var command = new SqliteCommand("INSERT INTO Assets (ItemName, Description, SerialNumber, AssetNumber, Location, BookedOutTo) VALUES (@itemName, @description, @serialNumber, @assetNumber, @location, @bookedOutTo)", connection))
+                using (var command = new SqliteCommand("INSERT INTO Assets (Name, Description, SerialNumber, AssetNumber, Location) VALUES (@Name, @description, @serialNumber, @assetNumber, @location)", connection))
                 {
-                    command.Parameters.AddWithValue("@itemName", asset.ItemName);
+                    command.Parameters.AddWithValue("@Name", asset.Name);
                     command.Parameters.AddWithValue("@description", asset.Description);
                     command.Parameters.AddWithValue("@serialNumber", asset.SerialNumber);
                     command.Parameters.AddWithValue("@assetNumber", asset.AssetNumber);
                     command.Parameters.AddWithValue("@location", asset.Location);
-                    command.Parameters.AddWithValue("@bookedOutTo", (object)asset.BookedOutTo ?? DBNull.Value);
+                    // command.Parameters.AddWithValue("@bookedOutTo", (object)asset.BookedOutTo ?? DBNull.Value);
 
                     await command.ExecuteNonQueryAsync();
                 }
@@ -175,16 +170,98 @@ namespace Assettmanagement.Data
             }
         }
 
-        public async Task ReturnAssetAsync(int assetId)
+        public async Task<List<Asset>> GetAvailableAssetsAsync()
         {
             using (var connection = _accessDatabase.GetConnection())
             {
-                using (var command = new SqliteCommand("UPDATE Assets SET BookedOutTo = NULL WHERE Id = @assetId", connection))
+                var assets = new List<Asset>();
+                using (var command = new SqliteCommand("SELECT * FROM Assets WHERE UserId IS NULL", connection))
                 {
-                    command.Parameters.AddWithValue("@assetId", assetId);
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            assets.Add(new Asset
+                            {
+                                Id = reader.GetInt32(0),
+                                Name = reader.GetString(1),
+                                Description = reader.GetString(2),
+                                SerialNumber = reader.GetString(3),
+                                AssetNumber = reader.GetString(4),
+                                Location = reader.GetString(5),
+                                UserId = reader.IsDBNull(6) ? (int?)null : reader.GetInt32(6)
+                            });
+                        }
+                    }
+                }
+
+                return assets;
+            }
+        }
+
+        public async Task<List<Asset>> GetAssignedAssetsAsync()
+        {
+            using (var connection = _accessDatabase.GetConnection())
+            {
+                var assets = new List<Asset>();
+                using (var command = new SqliteCommand("SELECT a.*, u.* FROM Assets a INNER JOIN Users u ON a.UserId = u.Id WHERE a.UserId IS NOT NULL", connection))
+                {
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            var asset = new Asset
+                            {
+                                Id = reader.GetInt32(0),
+                                Name = reader.GetString(1),
+                                Description = reader.GetString(2),
+                                SerialNumber = reader.GetString(3),
+                                AssetNumber = reader.GetString(4),
+                                Location = reader.GetString(5),
+                                UserId = reader.GetInt32(6)
+                            };
+
+                            asset.User = new User
+                            {
+                                Id = reader.GetInt32(7),
+                                FirstName = reader.GetString(8),
+                                LastName = reader.GetString(9)
+                            };
+
+                            assets.Add(asset);
+                        }
+                    }
+                }
+
+                return assets;
+            }
+        }
+
+        public async Task AssignAssetToUserAsync(int assetId, int userId)
+        {
+            using (var connection = _accessDatabase.GetConnection())
+            {
+                using (var command = new SqliteCommand("UPDATE Assets SET UserId = @UserId WHERE Id = @AssetId", connection))
+                {
+                    command.Parameters.AddWithValue("@UserId", userId);
+                    command.Parameters.AddWithValue("@AssetId", assetId);
+
                     await command.ExecuteNonQueryAsync();
                 }
             }
         }
+
+          public async Task ReturnAssetAsync(int assetId)
+          {
+              using (var connection = _accessDatabase.GetConnection())
+              {
+                  using (var command = new SqliteCommand("UPDATE Assets SET UserId = NULL WHERE Id = @AssetId", connection))
+                  {
+                      command.Parameters.AddWithValue("@AssetId", assetId);
+
+                      await command.ExecuteNonQueryAsync();
+                  }
+              }
+          }
     }
 }

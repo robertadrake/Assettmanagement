@@ -1,31 +1,115 @@
 ﻿@page
 @model Assettmanagement.Pages.Admin.IndexModel
+@{
+    ViewData["Title"] = "Admin";
+}
 
-<h1>Admin Page</h1>
+<h1>Admin</h1>
 
-<h2>Add Asset</h2>
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-info">
+        @TempData["Message"]
+    </div>
+}
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+</head>
+<div class="row">
+    <div class="col-md-6">
+        <h2>Assets</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Item Name</th>
+                    <th>Description</th>
+                    <th>Serial Number</th>
+                    <th>Asset Number</th>
+                    <th>Location</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var asset in Model.Assets)
+                {
+                    <tr>
+                        <td>@asset.Name</td>
+                        <td>@asset.Description</td>
+                        <td>@asset.SerialNumber</td>
+                        <td>@asset.AssetNumber</td>
+                        <td>@asset.Location</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="col-md-6">
+        <h2>Users</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model.Users)
+                {
+                    <tr>
+                        <td>@user.FirstName</td>
+                        <td>@user.LastName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<h2>Add New Asset</h2>
 <form method="post">
-    <input asp-for="NewAsset.ItemName" placeholder="Item Name" />
-    <input asp-for="NewAsset.Description" placeholder="Description" />
-    <input asp-for="NewAsset.SerialNumber" placeholder="Serial Number" />
-    <input asp-for="NewAsset.AssetNumber" placeholder="Asset Number" />
-    <input asp-for="NewAsset.Location" placeholder="Location" />
-    <button type="submit" asp-page-handler="AddAsset">Add Asset</button>
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="NewAsset.Name" class="control-label"></label>
+        <input asp-for="NewAsset.Name" class="form-control" />
+        <span asp-validation-for="NewAsset.Name" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="NewAsset.Description" class="control-label"></label>
+        <input asp-for="NewAsset.Description" class="form-control" />
+        <span asp-validation-for="NewAsset.Description" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="NewAsset.SerialNumber" class="control-label"></label>
+        <input asp-for="NewAsset.SerialNumber" class="form-control" />
+        <span asp-validation-for="NewAsset.SerialNumber" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="NewAsset.AssetNumber" class="control-label"></label>
+        <input asp-for="NewAsset.AssetNumber" class="form-control" />
+        <span asp-validation-for="NewAsset.AssetNumber" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="NewAsset.Location" class="control-label"></label>
+        <input asp-for="NewAsset.Location" class="form-control" />
+        <span asp-validation-for="NewAsset.Location" class="text-danger"></span>
+    </div>
+    <button type="submit" asp-page-handler="AddAsset" class="btn btn-primary">Add Asset</button>
 </form>
 
-<h2>Assets</h2>
-<table>
-    <!-- Add table header and rows for assets -->
-</table>
-
-<h2>Add User</h2>
+<h2>Add New User</h2>
 <form method="post">
-    <input asp-for="NewUser.FirstName" placeholder="First Name" />
-    <input asp-for="NewUser.LastName" placeholder="Last Name" />
-    <button type="submit" asp-page-handler="AddUser">Add User</button>
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="NewUser.FirstName" class="control-label"></label>
+        <input asp-for="NewUser.FirstName" class="form-control" />
+        <span asp-validation-for="NewUser.FirstName" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="NewUser.LastName" class="control-label"></label>
+        <input asp-for="NewUser.LastName" class="form-control" />
+        <span asp-validation-for="NewUser.LastName" class="text-danger"></span>
+    </div>
+    <button type="submit" asp-page-handler="AddUser" class="btn btn-primary">Add User</button>
 </form>
-
-<h2>Users</h2>
-<table>
-    <!-- Add table header and rows for users -->
-</table>

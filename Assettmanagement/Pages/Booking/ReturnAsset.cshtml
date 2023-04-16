@@ -1,0 +1,36 @@
+﻿@page
+@model Assettmanagement.Pages.Booking.ReturnAssetModel
+
+<h2>Return Asset</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Asset Name</th>
+            <th>Asset Number</th>
+            <th>Assigned to</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var asset in Model.AssignedAssets)
+        {
+            <tr>
+                <td>@asset.Name</td>
+                <td>@asset.AssetNumber</td>
+                <td>@asset.User.FirstName @asset.User.LastName</td>
+                <td>
+                    <form method="post">
+                        <input type="hidden" name="SelectedAssetId" value="@asset.Id" />
+                        <button type="submit" class="btn btn-primary">Return Asset</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (Model.ResultMessage != null)
+{
+    <div class="alert alert-info">@Model.ResultMessage</div>
+}
