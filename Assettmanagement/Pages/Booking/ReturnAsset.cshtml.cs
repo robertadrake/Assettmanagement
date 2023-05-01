@@ -40,10 +40,13 @@ namespace Assettmanagement.Pages.Booking
             {
                 await _dataAccess.ReturnAssetAsync(SelectedAssetId);
                 // Add a history entry for the returned asset
+                // Get or create the System user
+                User systemUser = await _dataAccess.GetOrCreateSystemUserAsync();
+
                 var assetHistory = new AssetHistory
                 {
                     AssetId = SelectedAssetId,
-                    UserId = null, // No user assigned since the asset is returned
+                    UserId = systemUser.Id, // No user assigned since the asset is returned
                     Comment = "Asset returned",
                     Timestamp = DateTime.UtcNow
                 };

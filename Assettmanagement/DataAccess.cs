@@ -520,6 +520,52 @@ namespace Assettmanagement.Data
             }
         }
 
+        public async Task<User> GetOrCreateSystemUserAsync()
+        {
+            using (var connection = _accessDatabase.GetConnection())
+            {
+                User systemUser = null;
+
+                // Check if a System user already exists
+                using (var command = new SqliteCommand("SELECT * FROM Users WHERE FirstName = 'System' AND LastName = 'System'", connection))
+                {
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                systemUser = new User
+                                {
+                                    Id = reader.GetInt32(0),
+                                    FirstName = reader.GetString(1),
+                                    LastName = reader.GetString(2),
+                                };
+                            }
+                        }
+                    }
+                }
+
+                // If a System user does not exist, create one
+                if (systemUser == null)
+                {
+                    using (var command = new SqliteCommand("INSERT INTO Users (FirstName, LastName) VALUES ('System', 'System'); SELECT last_insert_rowid();", connection))
+                    {
+                        var newUserId = await command.ExecuteScalarAsync();
+
+                        systemUser = new User
+                        {
+                            Id = Convert.ToInt32(newUserId),
+                            FirstName = "System",
+                            LastName = "User",
+                        };
+                    }
+                }
+
+                return systemUser;
+            }
+        }
+
 
     }
 }

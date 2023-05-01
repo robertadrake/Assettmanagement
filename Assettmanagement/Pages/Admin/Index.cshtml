@@ -4,12 +4,13 @@
     ViewData["Title"] = "Admin";
 }
 
-<h1>Admin</h1>
-
-<p>
-    <a asp-page="./AddAsset">Add Asset</a>
-    <a asp-page="./AddUser">Add User</a>
-</p>
+<style>
+    .scrollable-table {
+        max-height: 400px;
+        overflow-y: auto;
+        display: block;
+    }
+</style>
 
 @if (!string.IsNullOrEmpty(Model.ResultMessage))
 {
@@ -19,7 +20,7 @@
 <h2>Assets</h2>
 <table class="table">
     <thead>
-        <tr>
+         <tr>
             <th>ID</th>
             <th>Name</th>
             <th>Description</th>
@@ -30,6 +31,9 @@
             <th>Action</th>
         </tr>
     </thead>
+</table>
+<div class="scrollable-table">
+<table class="table">
     <tbody>
         @foreach (var asset in Model.Assets)
         {
@@ -60,6 +64,7 @@
         }
     </tbody>
 </table>
+</div>
 
 
 <h2>Users</h2>
@@ -72,6 +77,9 @@
             <th>Action</th>
         </tr>
     </thead>
+</table>
+<div class="scrollable-table">
+<table class="table">
     <tbody>
         @foreach (var user in Model.Users)
         {
@@ -89,3 +97,4 @@
         }
     </tbody>
 </table>
+</div>
