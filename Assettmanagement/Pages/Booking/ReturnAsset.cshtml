@@ -2,30 +2,53 @@
 @model Assettmanagement.Pages.Booking.ReturnAssetModel
 
 <h2>Return Asset</h2>
-
+<form method="get">
+    <div class="form-group">
+        <label for="AssetTypeFilter">Filter by Asset Type:</label>
+        <select id="AssetTypeFilter" asp-for="SelectedAssetType" class="form-control" onchange="this.form.submit();">
+            <option value="">Show All</option>
+            <option value="Prototype">Prototype</option>
+            <option value="Test Equipment">Test Equipment</option>
+            <option value="Test Product">Test Product</option>
+        </select>
+    </div>
+</form>
 <table class="table">
     <thead>
         <tr>
-            <th>Asset Name</th>
-            <th>Asset Number</th>
-            <th>Assigned to</th>
-            <th>Action</th>
+            <th style="width: 5%;">ID</th>
+            <th style="width: 10%;">Type</th>
+            <th style="width: 15%;">Name</th>
+            <th style="width: 20%;">Description</th>
+            <th style="width: 10%;">Serial Number</th>
+            <th style="width: 10%;">Asset Number</th>
+            <th style="width: 10%;">Location</th>
+            <th style="width: 10%;">Assigned to</th>
+            <th style="width: 10%;">Action</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var asset in Model.AssignedAssets)
+        @if (Model.AssignedAssets != null && Model.AssignedAssets.Any())
         {
-            <tr>
-                <td>@asset.Name</td>
-                <td>@asset.AssetNumber</td>
-                <td>@asset.User.FirstName @asset.User.LastName</td>
-                <td>
-                    <form method="post">
-                        <input type="hidden" name="SelectedAssetId" value="@asset.Id" />
-                        <button type="submit" class="btn btn-primary">Return Asset</button>
-                    </form>
-                </td>
-            </tr>
+            @foreach (var asset in Model.AssignedAssets)
+            {
+                <tr>
+                    <td style="width: 5%;">@asset.Id</td>
+                    <td style="width: 10%;">@asset.AssetType</td>
+                    <td style="width: 15%;">"@asset.Name</td>
+                    <td style="width: 20%;">@asset.Description</td>
+                    <td style="width: 10%;">@asset.SerialNumber</td>
+                    <td style="width: 10%;">@asset.AssetNumber</td>
+                    <td style="width: 10%;">@asset.Location</td>
+                    <td style="width: 10%;">@asset.User.FirstName @asset.User.LastName</td>
+                    <td style="width: 10%;">
+                        <form method="post">
+                            <input type="hidden" name="SelectedAssetId" value="@asset.Id" />
+                            <button type="submit" class="btn btn-primary">Return Asset</button>
+                        </form>
+                    </td>
+                </tr>
+            }
         }
     </tbody>
 </table>

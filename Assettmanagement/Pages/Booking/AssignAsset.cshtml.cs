@@ -21,7 +21,8 @@ namespace Assettmanagement.Pages.Booking
 
         [BindProperty]
         public int SelectedUserId { get; set; }
-
+        [BindProperty(SupportsGet = true)]
+        public string SelectedAssetType { get; set; }
         public List<Asset> AvailableAssets { get; set; }
 
         public List<User> Users { get; set; }
@@ -30,7 +31,7 @@ namespace Assettmanagement.Pages.Booking
 
         public async Task OnGetAsync()
         {
-            AvailableAssets = await _dataAccess.GetAvailableAssetsAsync();
+            AvailableAssets = await _dataAccess.GetAvailableAssetsAsync(SelectedAssetType);
             Users = await _dataAccess.GetUsersAsync();
         }
 

@@ -11,22 +11,22 @@ namespace Assettmanagement.Pages.Booking
     public class ReturnAssetModel : PageModel
     {
         private readonly DataAccess _dataAccess;
-
+        [BindProperty(SupportsGet = true)]
+        public string SelectedAssetType { get; set; }
+        [BindProperty]
+        public int SelectedAssetId { get; set; }
         public ReturnAssetModel(DataAccess dataAccess)
         {
             _dataAccess = dataAccess;
         }
-
-        [BindProperty]
-        public int SelectedAssetId { get; set; }
-
         public List<Asset> AssignedAssets { get; set; }
 
         public string ResultMessage { get; set; }
 
         public async Task OnGetAsync()
         {
-            AssignedAssets = await _dataAccess.GetAssignedAssetsAsync();
+            AssignedAssets = await _dataAccess.GetAssignedAssetsAsync(SelectedAssetType);
+           // Assets = await _dataAccess.GetFilteredAssetsAsync(SelectedAssetType);
         }
 
         public async Task<IActionResult> OnPostAsync()

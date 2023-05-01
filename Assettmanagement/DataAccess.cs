@@ -218,13 +218,71 @@ namespace Assettmanagement.Data
             }
         }
 
-        public async Task<List<Asset>> GetAssignedAssetsAsync()
+        public async Task<List<Asset>> GetAvailableAssetsAsync(string assetType)
+        {
+            List<Asset> assets = new List<Asset>();
+
+            using (var connection = _accessDatabase.GetConnection())
+            {
+                string query = "SELECT * FROM Assets WHERE UserId IS NULL";
+
+                if (!string.IsNullOrEmpty(assetType))
+                {
+                    query += " AND AssetType = @AssetType";
+                }
+
+                using (var command = new SqliteCommand(query, connection))
+                {
+                    if (!string.IsNullOrEmpty(assetType))
+                    {
+                        command.Parameters.AddWithValue("@AssetType", assetType);
+                    }
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            var asset = new Asset
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Name = reader.GetString(reader.GetOrdinal("Name")),
+                                Description = reader.GetString(reader.GetOrdinal("Description")),
+                                SerialNumber = reader.GetString(reader.GetOrdinal("SerialNumber")),
+                                AssetNumber = reader.GetString(reader.GetOrdinal("AssetNumber")),
+                                Location = reader.GetString(reader.GetOrdinal("Location")),
+                                AssetType = reader.GetString(reader.GetOrdinal("AssetType")),
+                                UserId = reader.IsDBNull(reader.GetOrdinal("UserId")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("UserId"))
+                            };
+
+                            assets.Add(asset);
+                        }
+                    }
+                }
+            }
+
+            return assets;
+        }
+
+
+
+        public async Task<List<Asset>> GetAssignedAssetsAsync(string assetType)
         {
             using (var connection = _accessDatabase.GetConnection())
             {
                 var assets = new List<Asset>();
-                using (var command = new SqliteCommand("SELECT a.*, u.* FROM Assets a INNER JOIN Users u ON a.UserId = u.Id WHERE a.UserId IS NOT NULL", connection))
+                string query = "SELECT a.*, u.* FROM Assets a INNER JOIN Users u ON a.UserId = u.Id WHERE a.UserId IS NOT NULL";
+
+                if (!string.IsNullOrEmpty(assetType))
                 {
+                    query += " AND AssetType = @AssetType";
+                }
+
+                using (var command = new SqliteCommand(query, connection))
+                {
+                    if (!string.IsNullOrEmpty(assetType))
+                    {
+                        command.Parameters.AddWithValue("@AssetType", assetType);
+                    }
                     using (var reader = await command.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
@@ -580,10 +638,10 @@ namespace Assettmanagement.Data
             using (var connection = _accessDatabase.GetConnection())
             {
                 string query = @"
-            SELECT Assets.*, Users.FirstName, Users.LastName
-            FROM Assets
-            LEFT JOIN Users ON Assets.UserId = Users.Id
-        ";
+                    SELECT Assets.*, Users.FirstName, Users.LastName
+                    FROM Assets
+                    LEFT JOIN Users ON Assets.UserId = Users.Id
+                    ";
 
                 if (!string.IsNullOrEmpty(assetType))
                 {
