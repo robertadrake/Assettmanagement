@@ -15,6 +15,9 @@ namespace Assettmanagement.Pages.Admin
         {
             _dataAccess = dataAccess;
         }
+        [BindProperty(SupportsGet = true)]
+        public string SelectedAssetType { get; set; }
+
 
         public List<Asset> Assets { get; set; }
         public List<User> Users { get; set; }
@@ -30,7 +33,9 @@ namespace Assettmanagement.Pages.Admin
 
         public async Task<IActionResult> OnGetAsync()
         {
-            Assets = await _dataAccess.GetAssetsWithUsersAsync();
+            //Assets = await _dataAccess.GetAssetsWithUsersAsync();
+            Assets = await _dataAccess.GetFilteredAssetsAsync(SelectedAssetType);
+
             Users = await _dataAccess.GetUsersAsync();
 
             return Page();

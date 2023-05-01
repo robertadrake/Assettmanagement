@@ -8,9 +8,11 @@
         public string SerialNumber { get; set; }
         public string AssetNumber { get; set; }
         public string Location { get; set; }
+        public string AssetType { get; set; }
 
         // The user to whom the asset is assigned
         public User User { get; set; }
         public int? UserId { get; set; }
+
     }
 }

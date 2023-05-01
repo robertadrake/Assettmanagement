@@ -29,6 +29,7 @@ namespace Assettmanagement.Database
                     SerialNumber TEXT NOT NULL,
                     AssetNumber TEXT NOT NULL,
                     Location TEXT NOT NULL,
+                    AssetType TEXT NOT NULL,
                     UserId INTEGER,
                     FOREIGN KEY (UserId) REFERENCES Users (Id)
                 );

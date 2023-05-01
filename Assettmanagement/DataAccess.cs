@@ -33,7 +33,8 @@ namespace Assettmanagement.Data
                                 SerialNumber = reader.GetString(3),
                                 AssetNumber = reader.GetString(4),
                                 Location = reader.GetString(5),
-                                UserId = reader.IsDBNull(6) ? (int?)null : reader.GetInt32(6)
+                                AssetType = reader.GetString(6),
+                                UserId = reader.IsDBNull(7) ? (int?)null : reader.GetInt32(7)
                             });
                         }
                     }
@@ -63,7 +64,8 @@ namespace Assettmanagement.Data
                                 SerialNumber = reader.GetString(3),
                                 AssetNumber = reader.GetString(4),
                                 Location = reader.GetString(5),
-                                UserId = reader.IsDBNull(6) ? (int?)null : reader.GetInt32(6)
+                                AssetType = reader.GetString(6),
+                                UserId = reader.IsDBNull(7) ? (int?)null : reader.GetInt32(7)
                             };
                         }
                     }
@@ -77,13 +79,14 @@ namespace Assettmanagement.Data
         {
             using (var connection = _accessDatabase.GetConnection())
             {
-                using (var command = new SqliteCommand("INSERT INTO Assets (Name, Description, SerialNumber, AssetNumber, Location) VALUES (@Name, @description, @serialNumber, @assetNumber, @location)", connection))
+                using (var command = new SqliteCommand("INSERT INTO Assets (Name, Description, SerialNumber, AssetNumber, Location, Assettype) VALUES (@Name, @description, @serialNumber, @assetNumber, @location, @assettype)", connection))
                 {
                     command.Parameters.AddWithValue("@Name", asset.Name);
                     command.Parameters.AddWithValue("@description", asset.Description);
                     command.Parameters.AddWithValue("@serialNumber", asset.SerialNumber);
                     command.Parameters.AddWithValue("@assetNumber", asset.AssetNumber);
                     command.Parameters.AddWithValue("@location", asset.Location);
+                    command.Parameters.AddWithValue("@assettype", asset.AssetType);
                     command.Parameters.AddWithValue("@UserId", asset.UserId);
                     // command.Parameters.AddWithValue("@bookedOutTo", (object)asset.BookedOutTo ?? DBNull.Value);
 
@@ -204,7 +207,8 @@ namespace Assettmanagement.Data
                                 SerialNumber = reader.GetString(3),
                                 AssetNumber = reader.GetString(4),
                                 Location = reader.GetString(5),
-                                UserId = reader.IsDBNull(6) ? (int?)null : reader.GetInt32(6)
+                                AssetType = reader.GetString(6),
+                                UserId = reader.IsDBNull(7) ? (int?)null : reader.GetInt32(7)
                             });
                         }
                     }
@@ -233,14 +237,15 @@ namespace Assettmanagement.Data
                                 SerialNumber = reader.GetString(3),
                                 AssetNumber = reader.GetString(4),
                                 Location = reader.GetString(5),
-                                UserId = reader.GetInt32(6)
+                                AssetType = reader.GetString(7),
+                                UserId = reader.GetInt32(7)
                             };
 
                             asset.User = new User
                             {
-                                Id = reader.GetInt32(7),
-                                FirstName = reader.GetString(8),
-                                LastName = reader.GetString(9)
+                                Id = reader.GetInt32(8),
+                                FirstName = reader.GetString(9),
+                                LastName = reader.GetString(10)
                             };
 
                             assets.Add(asset);
@@ -302,7 +307,8 @@ namespace Assettmanagement.Data
                                 SerialNumber = reader.GetString(3),
                                 AssetNumber = reader.GetString(4),
                                 Location = reader.GetString(5),
-                                UserId = reader.IsDBNull(6) ? null : reader.GetInt32(6)
+                                AssetType = reader.GetString(6),
+                                UserId = reader.IsDBNull(7) ? null : reader.GetInt32(7)
                             });
                         }
                     }
@@ -362,12 +368,13 @@ namespace Assettmanagement.Data
                                 SerialNumber = reader.GetString(3),
                                 AssetNumber = reader.GetString(4),
                                 Location = reader.GetString(5),
-                                UserId = reader.IsDBNull(6) ? null : reader.GetInt32(6),
-                                User = reader.IsDBNull(7) ? null : new User
+                                AssetType = reader.GetString(6),
+                                UserId = reader.IsDBNull(7) ? null : reader.GetInt32(7),
+                                User = reader.IsDBNull(8) ? null : new User
                                 {
-                                    Id = reader.GetInt32(7),
-                                    FirstName = reader.GetString(8),
-                                    LastName = reader.GetString(9),
+                                    Id = reader.GetInt32(8),
+                                    FirstName = reader.GetString(9),
+                                    LastName = reader.GetString(10),
                                 }
                             });
                         }
@@ -383,7 +390,7 @@ namespace Assettmanagement.Data
         {
             using (var connection = _accessDatabase.GetConnection())
             {
-                const string query = "UPDATE Assets SET Name = @Name, Description = @Description, SerialNumber = @SerialNumber, AssetNumber = @AssetNumber, Location = @Location, UserId = @UserId WHERE Id = @Id;";
+                const string query = "UPDATE Assets SET Name = @Name, Description = @Description, SerialNumber = @SerialNumber, AssetNumber = @AssetNumber, Location = @Location, Assettype = @Assettype, UserId = @UserId WHERE Id = @Id;";
                 using (var command = new SqliteCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Id", asset.Id);
@@ -392,6 +399,7 @@ namespace Assettmanagement.Data
                     command.Parameters.AddWithValue("@SerialNumber", asset.SerialNumber);
                     command.Parameters.AddWithValue("@AssetNumber", asset.AssetNumber);
                     command.Parameters.AddWithValue("@Location", asset.Location);
+                    command.Parameters.AddWithValue("@Assettype", asset.AssetType);
                     command.Parameters.AddWithValue("@UserId", (object)asset.UserId ?? DBNull.Value);
 
                     await command.ExecuteNonQueryAsync();
@@ -565,6 +573,64 @@ namespace Assettmanagement.Data
                 return systemUser;
             }
         }
+        public async Task<List<Asset>> GetFilteredAssetsAsync(string assetType)
+        {
+            List<Asset> assets = new List<Asset>();
+
+            using (var connection = _accessDatabase.GetConnection())
+            {
+                string query = @"
+            SELECT Assets.*, Users.FirstName, Users.LastName
+            FROM Assets
+            LEFT JOIN Users ON Assets.UserId = Users.Id
+        ";
+
+                if (!string.IsNullOrEmpty(assetType))
+                {
+                    query += " WHERE Assets.AssetType = @AssetType";
+                }
+
+                using (var command = new SqliteCommand(query, connection))
+                {
+                    if (!string.IsNullOrEmpty(assetType))
+                    {
+                        command.Parameters.AddWithValue("@AssetType", assetType);
+                    }
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            var asset = new Asset
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Name = reader.GetString(reader.GetOrdinal("Name")),
+                                Description = reader.GetString(reader.GetOrdinal("Description")),
+                                SerialNumber = reader.GetString(reader.GetOrdinal("SerialNumber")),
+                                AssetNumber = reader.GetString(reader.GetOrdinal("AssetNumber")),
+                                Location = reader.GetString(reader.GetOrdinal("Location")),
+                                AssetType = reader.GetString(reader.GetOrdinal("AssetType")),
+                                UserId = reader.IsDBNull(reader.GetOrdinal("UserId")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("UserId"))
+                            };
+
+                            if (!reader.IsDBNull(reader.GetOrdinal("FirstName")) && !reader.IsDBNull(reader.GetOrdinal("LastName")))
+                            {
+                                asset.User = new User
+                                {
+                                    FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                    LastName = reader.GetString(reader.GetOrdinal("LastName"))
+                                };
+                            }
+
+                            assets.Add(asset);
+                        }
+                    }
+                }
+            }
+
+            return assets;
+        }
+
 
 
     }

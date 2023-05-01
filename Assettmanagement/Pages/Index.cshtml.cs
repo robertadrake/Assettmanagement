@@ -11,14 +11,21 @@ namespace Assettmanagement.Pages
     {
         private readonly ILogger<IndexModel> _logger;
         private readonly DataAccess _dataAccess;
+        [BindProperty(SupportsGet = true)]
+        public string SelectedAssetType { get; set; }
+        [BindProperty]
+        public int SelectedAssetId { get; set; }
         public IndexModel(DataAccess dataAccess)
         {
             _dataAccess = dataAccess;
         }
         public List<Asset> Assets { get; set; }
-        public async Task OnGetAsync()
+
+        public async Task<IActionResult> OnGetAsync()
         {
-            Assets = await _dataAccess.GetAssetsWithUsersAsync();
+            Assets = await _dataAccess.GetFilteredAssetsAsync(SelectedAssetType);
+            return Page();
         }
+
     }
 }
