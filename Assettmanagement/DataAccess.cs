@@ -398,5 +398,128 @@ namespace Assettmanagement.Data
                 }
             }
         }
+
+        // Assett history...
+        public async Task AddAssetHistoryAsync(AssetHistory assetHistory)
+        {
+            using (var connection = _accessDatabase.GetConnection())
+            {
+                string insertQuery = @"INSERT INTO AssetHistory (AssetId, UserId, Timestamp, Comment)
+                                VALUES (@AssetId, @UserId, @Timestamp, @Comment);";
+                using (var command = new SqliteCommand(insertQuery, connection))
+                {
+                    command.Parameters.AddWithValue("@AssetId", assetHistory.AssetId);
+                    command.Parameters.AddWithValue("@UserId", assetHistory.UserId);
+                    command.Parameters.AddWithValue("@Timestamp", assetHistory.Timestamp);
+                    command.Parameters.AddWithValue("@Comment", assetHistory.Comment);
+
+                    await command.ExecuteNonQueryAsync();
+                }
+            }
+        }
+
+        public async Task<List<AssetHistory>> GetAssetHistoryAsync(int assetId)
+        {
+            using (var connection = _accessDatabase.GetConnection())
+            {
+                List<AssetHistory> assetHistories = new List<AssetHistory>();
+
+                string selectQuery = @"SELECT * FROM AssetHistory
+                               WHERE AssetId = @AssetId
+                               ORDER BY Timestamp DESC;";
+                using (var command = new SqliteCommand(selectQuery, connection))
+                {
+                    command.Parameters.AddWithValue("@AssetId", assetId);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            var assetHistory = new AssetHistory
+                            {
+                                Id = reader.GetInt32(0),
+                                AssetId = reader.GetInt32(1),
+                                UserId = reader.GetInt32(2),
+                                Timestamp = reader.GetDateTime(3),
+                                Comment = reader.GetString(4)
+                            };
+
+                            assetHistories.Add(assetHistory);
+                        }
+                    }
+                }
+
+                return assetHistories;
+            }
+        }
+
+        public async Task<List<AssetHistory>> GetAssetHistoriesWithUsersAsync(int assetId)
+        {
+            using (var connection = _accessDatabase.GetConnection())
+            {
+                var assetHistories = new List<AssetHistory>();
+
+                using (var command = new SqliteCommand("SELECT AssetHistory.Id, AssetHistory.Timestamp, AssetHistory.Comment, AssetHistory.UserId, Users.FirstName, Users.LastName FROM AssetHistory JOIN Users ON AssetHistory.UserId = Users.Id WHERE AssetHistory.AssetId = @AssetId ORDER BY AssetHistory.Timestamp DESC", connection))
+                {
+                    command.Parameters.AddWithValue("@AssetId", assetId);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            assetHistories.Add(new AssetHistory
+                            {
+                                Id = reader.GetInt32(0),
+                                Timestamp = reader.GetDateTime(1),
+                                Comment = reader.GetString(2),
+                                UserId = reader.GetInt32(3),
+                                User = new User
+                                {
+                                    Id = reader.GetInt32(3),
+                                    FirstName = reader.GetString(4),
+                                    LastName = reader.GetString(5),
+                                },
+                                AssetId = assetId
+                            });
+                        }
+                    }
+                }
+
+                return assetHistories;
+            }
+        }
+
+        public async Task<User> GetUserByIdAsync(int userId)
+        {
+            using (var connection = _accessDatabase.GetConnection())
+            {
+                using (var command = new SqliteCommand("SELECT * FROM Users WHERE Id = @UserId", connection))
+                {
+                    command.Parameters.AddWithValue("@UserId", userId);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            var user = new User
+                            {
+                                Id = reader.GetInt32(0),
+                                FirstName = reader.GetString(1),
+                                LastName = reader.GetString(2),
+                                // Add any other User properties you have in your model
+                            };
+
+                            return user;
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
+                }
+            }
+        }
+
+
     }
 }

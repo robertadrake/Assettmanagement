@@ -39,6 +39,17 @@ namespace Assettmanagement.Pages.Booking
             try
             {
                 await _dataAccess.ReturnAssetAsync(SelectedAssetId);
+                // Add a history entry for the returned asset
+                var assetHistory = new AssetHistory
+                {
+                    AssetId = SelectedAssetId,
+                    UserId = null, // No user assigned since the asset is returned
+                    Comment = "Asset returned",
+                    Timestamp = DateTime.UtcNow
+                };
+
+                await _dataAccess.AddAssetHistoryAsync(assetHistory);
+
                 ResultMessage = "Asset successfully returned.";
             }
             catch

@@ -40,11 +40,24 @@ namespace Assettmanagement.Database
                     LastName TEXT NOT NULL
                 );
                 ";
+                string createAssetHistoryTableQuery = @"
+                CREATE TABLE IF NOT EXISTS AssetHistory (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    AssetId INTEGER NOT NULL,
+                    UserId INTEGER NOT NULL,
+                    Comment TEXT NOT NULL,
+                    Timestamp TEXT NOT NULL,
+                    FOREIGN KEY (AssetId) REFERENCES Asset (Id),
+                    FOREIGN KEY (UserId) REFERENCES User (Id)
+                );
+                ";
                 using (var command = connection.CreateCommand())
                 {
                     command.CommandText = createAssetsTable;
                     command.ExecuteNonQuery();
                     command.CommandText = createUsersTable;
+                    command.ExecuteNonQuery();
+                    command.CommandText = createAssetHistoryTableQuery;
                     command.ExecuteNonQuery();
                 }
             }

@@ -24,14 +24,14 @@
                 <td>
                     <form method="post" asp-page-handler="Assign">
                         <input type="hidden" asp-for="SelectedAssetId" value="@asset.Id" />
-                        <select asp-for="SelectedUserId">
+                        <select name="SelectedUserId" class="user-select">
                             <option value="">Select user</option>
                             @foreach (var user in Model.Users)
                             {
                                 <option value="@user.Id">@user.FirstName @user.LastName</option>
                             }
                         </select>
-                        <button type="submit" class="btn btn-primary">Assign Asset</button>
+                        <button type="submit" class="btn btn-primary assign-asset-button" disabled>Assign Asset</button>
                     </form>
                 </td>
             </tr>
@@ -42,4 +42,15 @@
 @if (Model.ResultMessage != null)
 {
     <div class="alert alert-info">@Model.ResultMessage</div>
+}
+
+@section Scripts {
+    <script>
+        document.querySelectorAll(".user-select").forEach(function (select) {
+            select.addEventListener("change", function () {
+                var assignButton = this.closest("form").querySelector(".assign-asset-button");
+                assignButton.disabled = this.value === "";
+            });
+        });
+    </script>
 }

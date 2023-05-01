@@ -51,6 +51,22 @@ namespace Assettmanagement.Pages.Booking
             try
             {
                 await _dataAccess.AssignAssetToUserAsync(SelectedAssetId, SelectedUserId);
+
+                // Retrieve the user's details
+                User user = await _dataAccess.GetUserByIdAsync(SelectedUserId);
+
+                // Create an AssetHistory instance
+                AssetHistory assetHistory = new AssetHistory
+                {
+                    AssetId = SelectedAssetId,
+                    UserId = SelectedUserId,
+                    Timestamp = DateTime.UtcNow,
+                    Comment = $"Asset assigned to {user.FirstName} {user.LastName}"
+                };
+
+                // Add the asset history entry to the database
+                await _dataAccess.AddAssetHistoryAsync(assetHistory);
+
                 ResultMessage = "Asset successfully assigned.";
             }
             catch

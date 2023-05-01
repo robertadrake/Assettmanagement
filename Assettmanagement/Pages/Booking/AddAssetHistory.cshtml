@@ -1,0 +1,113 @@
+﻿@page
+@model Assettmanagement.Pages.Booking.AddAssetHistoryModel
+@{
+    ViewData["Title"] = "Add Asset History";
+}
+
+<h2>Add Asset History</h2>
+
+<form method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-group">
+        <label asp-for="AssetHistory.AssetId" class="control-label">Asset</label>
+        <select asp-for="AssetHistory.AssetId" class="form-control" asp-items="@(ViewData["AssetList"] as SelectList)">
+        </select>
+        <span asp-validation-for="AssetHistory.AssetId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="AssetHistory.UserId" class="control-label">User</label>
+        <select asp-for="AssetHistory.UserId" class="form-control" asp-items="@(ViewData["UserList"] as SelectList)">
+        </select>
+        <span asp-validation-for="AssetHistory.UserId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="AssetHistory.Comment" class="control-label">Comment</label>
+        <input asp-for="AssetHistory.Comment" class="form-control" />
+        <span asp-validation-for="AssetHistory.Comment" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Asset History</button>
+
+    @if (Model.AssetHistories != null && Model.AssetHistories.Count > 0)
+    {
+        <div id="history-section">
+        <h3>Asset History</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Comment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var history in Model.AssetHistories)
+                    {
+                        <tr>
+                            <td>@history.Timestamp.ToString("G")</td>
+                            <td>@history.User.FirstName @history.User.LastName</td>
+                            <td>@history.Comment</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    }
+</form>
+
+@if (!string.IsNullOrEmpty(ViewData["ResultMessage"] as string))
+{
+    <div class="alert @(ViewData["IsSuccess"] as bool? == true ? "alert-success" : "alert-danger") mt-3">
+        @ViewData["ResultMessage"]
+    </div>
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function updateHistorySection(data) {
+            var historySection = document.getElementById("history-section");
+            if (data.length === 0) {
+                historySection.innerHTML = "<p>No asset history found.</p>";
+                return;
+            }
+
+            var historyHtml = `<table class="table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Comment</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            data.forEach(history => {
+                historyHtml += `<tr>
+                    <td>${new Date(history.timestamp).toLocaleString()}</td>
+                    <td>${history.user.firstName} ${history.user.lastName}</td>
+                    <td>${history.comment}</td>
+                </tr>`;
+            });
+            historyHtml += "</tbody></table>";
+            historySection.innerHTML = historyHtml;
+        }
+
+        document.getElementById("AssetHistory_AssetId").addEventListener("change", function () {
+            var assetId = this.value;
+            if (assetId) {
+                fetch("/Booking/AddAssetHistory?handler=LoadAssetHistories&assetId=" + assetId)
+                    .then(response => response.json())
+                    .then(updateHistorySection);
+            } else {
+                updateHistorySection([]);
+            }
+        });
+
+    </script>
+}

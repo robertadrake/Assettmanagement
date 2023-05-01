@@ -1,0 +1,29 @@
+﻿@page
+@model Assettmanagement.Pages.AssetHistoryModel
+@{
+    ViewData["Title"] = "Asset History";
+}
+
+<h2>Asset History: @Model.Asset.Name</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Timestamp</th>
+            <th>User</th>
+            <th>Comment</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var history in Model.AssetHistories)
+        {
+            <tr>
+                <td>@history.Timestamp.ToString("g")</td>
+                <td>@history.User.FirstName @history.User.LastName</td>
+                <td>@history.Comment</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-page="./Index">Back to Assets</a>
