@@ -33,9 +33,11 @@ namespace Assettmanagement.Pages.Admin
 
         public async Task<IActionResult> OnPostAsync()
         {
+            ModelState.Remove("File");
+            ModelState.Remove("Asset.User");
             if (!ModelState.IsValid)
             {
-            //    return Page();
+              return Page();
             }
 
             try

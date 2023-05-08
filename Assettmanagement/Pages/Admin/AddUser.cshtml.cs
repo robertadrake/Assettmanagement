@@ -38,6 +38,7 @@ namespace Assettmanagement.Pages.Admin
 
         public async Task<IActionResult> OnPostAsync()
         {
+            ModelState.Remove("File");
             if (!ModelState.IsValid)
             {
                 return Page();
