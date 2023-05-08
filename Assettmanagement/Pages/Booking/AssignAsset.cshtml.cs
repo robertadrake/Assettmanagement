@@ -37,8 +37,11 @@ namespace Assettmanagement.Pages.Booking
 
         public async Task<IActionResult> OnPostAsync()
         {
+            ModelState.Remove("SelectedAssetType");
             if (!ModelState.IsValid)
             {
+                ResultMessage = "Data Inclompete no action taken.";
+                await OnGetAsync();
                 return Page();
             }
 

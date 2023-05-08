@@ -295,7 +295,7 @@ namespace Assettmanagement.Data
                                 SerialNumber = reader.GetString(3),
                                 AssetNumber = reader.GetString(4),
                                 Location = reader.GetString(5),
-                                AssetType = reader.GetString(7),
+                                AssetType = reader.GetString(6),
                                 UserId = reader.GetInt32(7)
                             };
 
