@@ -5,7 +5,18 @@
 }
 
 <h2>Add Asset History</h2>
-
+<!-- Filter by Asset Type -->
+<form method="get">
+    <div class="form-group">
+        <label for="AssetTypeFilter">Filter by Asset Type:</label>
+        <select id="AssetTypeFilter" asp-for="SelectedAssetType" class="form-control" onchange="this.form.submit();">
+            <option value="">Show All</option>
+            <option value="Prototype">Prototype</option>
+            <option value="Test Equipment">Test Equipment</option>
+            <option value="Test Product">Test Product</option>
+        </select>
+    </div>
+</form>
 <form method="post">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -16,12 +27,16 @@
         <span asp-validation-for="AssetHistory.AssetId" class="text-danger"></span>
     </div>
 
+    <div id="selected-asset-details"></div>
+
     <div class="form-group">
         <label asp-for="AssetHistory.UserId" class="control-label">User</label>
         <select asp-for="AssetHistory.UserId" class="form-control" asp-items="@(ViewData["UserList"] as SelectList)">
         </select>
         <span asp-validation-for="AssetHistory.UserId" class="text-danger"></span>
     </div>
+
+
 
     <div class="form-group">
         <label asp-for="AssetHistory.Comment" class="control-label">Comment</label>
@@ -108,6 +123,72 @@
                 updateHistorySection([]);
             }
         });
+        
+        document.getElementById("AssetTypeFilter").value = "@Model.SelectedAssetType";
+
+        function updateSelectedAssetDetails(assetId) {
+            if (assetId) {
+                fetch("/Booking/AddAssetHistory?handler=GetAssetDetails&assetId=" + assetId)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById("selected-asset-details").innerHTML = `
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Name</th>
+                                        <th>Description</th>
+                                        <th>Asset Number</th>
+                                        <th>Location</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>${data.assetType}</td>
+                                        <td>${data.name}</td>
+                                        <td>${data.description}</td>
+                                        <td>${data.assetNumber}</td>
+                                        <td>${data.location}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        `;
+                    });
+            } else {
+                document.getElementById("selected-asset-details").innerHTML = "";
+            }
+        }
+
+
+        document.getElementById("AssetHistory_AssetId").addEventListener("change", function () {
+            var assetId = this.value;
+            updateSelectedAssetDetails(assetId);
+            if (assetId) {
+                fetch("/Booking/AddAssetHistory?handler=LoadAssetHistories&assetId=" + assetId)
+                    .then(response => response.json())
+                    .then(updateHistorySection);
+            } else {
+                updateHistorySection([]);
+            }
+        });
+
+        function loadSelectedAssetDetailsOnLoadAndFilterChange() {
+            var assetDropdown = document.getElementById("AssetHistory_AssetId");
+            if (assetDropdown.selectedIndex >= 0) {
+                var assetId = assetDropdown.options[assetDropdown.selectedIndex].value;
+                updateSelectedAssetDetails(assetId);
+            }
+        }
+
+        document.getElementById("AssetTypeFilter").addEventListener("change", function () {
+            this.form.submit();
+            loadSelectedAssetDetailsOnLoadAndFilterChange();
+        });
+
+        window.addEventListener("load", function () {
+            loadSelectedAssetDetailsOnLoadAndFilterChange();
+        });
+
 
     </script>
 }
