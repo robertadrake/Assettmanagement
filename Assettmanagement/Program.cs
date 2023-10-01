@@ -21,7 +21,7 @@ builder.Services.AddRazorPages(options =>
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("SpecificUserOnly", policy => policy.RequireClaim(ClaimTypes.Name, "system"));
+    options.AddPolicy("SpecificUserOnly", policy => policy.RequireClaim(ClaimTypes.Name, "System"));
 });
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie();
