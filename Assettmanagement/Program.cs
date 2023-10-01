@@ -1,18 +1,30 @@
 using Assettmanagement.Data;
 using Assettmanagement.Database;
 using Assettmanagement.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddTransient<AccessDatabase>();
 builder.Services.AddTransient<DataAccess>();
-builder.Services.AddRazorPages();
-builder.Services.AddAuthorization(); // Add this line to register the authorization services.
+//builder.Services.AddRazorPages();
+builder.Services.AddRazorPages(options =>
+{
+    options.Conventions.AuthorizeFolder("/");
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("SpecificUserOnly", policy => policy.RequireClaim(ClaimTypes.Name, "system"));
+});
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie();
 
 var app = builder.Build();
 
@@ -30,8 +42,27 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapRazorPages();
+
+// Set the default route to the login page
+app.MapGet("/", async context =>
+{
+    if (!context.User.Identity.IsAuthenticated)
+    {
+        context.Response.Redirect("/Login");
+    }
+    else
+    {
+        // If the user is authenticated, you can let them access the root URL
+        // or redirect them to another page, e.g., a dashboard.
+         context.Response.Redirect("Index");
+
+        //return RedirectToPage("./Index");
+    }
+    await Task.CompletedTask;
+});
+
 
 app.Run();

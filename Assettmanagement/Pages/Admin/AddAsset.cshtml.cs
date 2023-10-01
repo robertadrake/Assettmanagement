@@ -3,11 +3,13 @@ using System.Threading.Tasks;
 using Assettmanagement.Data;
 using Assettmanagement.Models;
 using CsvHelper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Assettmanagement.Pages.Admin
 {
+    [Authorize(Policy = "SpecificUserOnly")]
     public class AddAssetModel : PageModel
     {
         private readonly DataAccess _dataAccess;

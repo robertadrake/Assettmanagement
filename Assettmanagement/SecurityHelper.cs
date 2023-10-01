@@ -18,5 +18,11 @@ namespace Assettmanagement.Security
                 return builder.ToString();
             }
         }
+
+        public static bool VerifyPassword(string providedPassword, string storedHash)
+        {
+            string hashedProvidedPassword = HashPassword(providedPassword);
+            return hashedProvidedPassword == storedHash;
+        }
     }
 }

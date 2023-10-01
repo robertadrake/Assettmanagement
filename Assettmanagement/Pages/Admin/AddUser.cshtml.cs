@@ -11,9 +11,11 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using System.Formats.Asn1;
 using Assettmanagement.Security;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Assettmanagement.Pages.Admin
 {
+    [Authorize(Policy = "SpecificUserOnly")]
     public class AddUserModel : PageModel
     {
         private readonly DataAccess _dataAccess;

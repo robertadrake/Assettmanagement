@@ -2,11 +2,13 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Assettmanagement.Data;
 using Assettmanagement.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Assettmanagement.Pages.Admin
 {
+    [Authorize(Policy = "SpecificUserOnly")]
     public class IndexModel : PageModel
     {
         private readonly DataAccess _dataAccess;

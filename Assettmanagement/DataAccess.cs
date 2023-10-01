@@ -151,6 +151,36 @@ namespace Assettmanagement.Data
 
             }
         }
+        public async Task<User> GetUserByEmailAsync(string email)
+        {
+            using (var connection = _accessDatabase.GetConnection())
+            {
+                User user = null;
+                using (var command = new SqliteCommand("SELECT * FROM Users WHERE Email = @Email", connection))
+                {
+                    command.Parameters.AddWithValue("@Email", email);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            user = new User
+                            {
+                                Id = reader.GetInt32(0),
+                                FirstName = reader.GetString(1),
+                                LastName = reader.GetString(2),
+                                Email = reader.GetString(3),
+                                PasswordHash = reader.GetString(4)
+                            };
+                        }
+                    }
+                }
+
+                return user;
+            }
+        }
+
+
 
         public async Task UpdateUserAsync(User user)
         {
