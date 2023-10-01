@@ -4,35 +4,47 @@
     ViewData["Title"] = "Add User";
 }
 
-
 <div class="container">
 <h2>Add User</h2>
 <form method="post">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <div class="form-group">
-        <label asp-for="User.FirstName">First Name</label>
-        <input asp-for="User.FirstName" class="form-control" />
-        <span asp-validation-for="User.FirstName" class="text-danger"></span>
+        <label asp-for="NewUser.FirstName">First Name</label>
+            <input asp-for="NewUser.FirstName" class="form-control" />
+            <span asp-validation-for="NewUser.FirstName" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="User.LastName">Last Name</label>
-        <input asp-for="User.LastName" class="form-control" />
-        <span asp-validation-for="User.LastName" class="text-danger"></span>
+            <label asp-for="NewUser.LastName">Last Name</label>
+            <input asp-for="NewUser.LastName" class="form-control" />
+            <span asp-validation-for="NewUser.LastName" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-primary">Add User</button>
+    <div class="form-group">
+            <label asp-for="NewUser.Email">Email</label>
+            <input asp-for="NewUser.Email" class="form-control" />
+            <span asp-validation-for="NewUser.Email" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+            <label asp-for="NewUser.PasswordHash">Password</label>
+            <input asp-for="NewUser.PasswordHash" type="password" class="form-control" />
+        <span asp-validation-for="NewUser.PasswordHash" class="text-danger"></span>
+    </div>
+
+    <button type="submit" asp-page-handler="OnPost" class="btn btn-primary">Add User</button>
     <button type="submit" asp-page-handler="ExportUsers" class="btn btn-primary">Export Users</button>
-    
+
 </form>
-    <form method="post" enctype="multipart/form-data" asp-page-handler="ImportUsers">
-        <div class="form-group">
-            <label for="importUsersFile">Import Users (CSV):</label>
-            <input type="file" id="importUsersFile" name="file" class="form-control-file" />
-        </div>
-        <button type="submit" class="btn btn-primary">Import Users</button>
-    </form>
+
+<form method="post" enctype="multipart/form-data" asp-page-handler="ImportUsers">
+    <div class="form-group">
+        <label for="importUsersFile">Import Users (CSV):</label>
+        <input type="file" id="importUsersFile" asp-for="ImportFile" class="form-control-file" />
+    </div>
+    <button type="submit" class="btn btn-primary">Import Users</button>
+</form>
 
 @if (!string.IsNullOrEmpty(Model.ResultMessage))
 {

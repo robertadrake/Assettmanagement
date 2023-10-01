@@ -10,6 +10,7 @@ using System.Globalization;
 using CsvHelper;
 using CsvHelper.Configuration;
 using System.Formats.Asn1;
+using Assettmanagement.Security;
 
 namespace Assettmanagement.Pages.Admin
 {
@@ -22,11 +23,11 @@ namespace Assettmanagement.Pages.Admin
             _dataAccess = dataAccess;
         }
 
-        [BindProperty]
-        public IFormFile File { get; set; }
+       // [BindProperty]
+        public IFormFile ImportFile { get; set; }
 
         [BindProperty]
-        public User User { get; set; }
+        public User NewUser { get; set; }
 
         [TempData]
         public string ResultMessage { get; set; }
@@ -38,14 +39,43 @@ namespace Assettmanagement.Pages.Admin
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid)
+          /*  if (!ModelState.IsValid)
             {
-                return Page();
-            }
+                // Collect validation errors
+                var errors = ModelState
+                    .Where(x => x.Value.Errors.Count > 0)
+                    .Select(x => new
+                    {
+                        Field = x.Key,
+                        ErrorMessages = x.Value.Errors.Select(e => e.ErrorMessage).ToList()
+                    }).ToList();
 
-            await _dataAccess.AddUserAsync(User);
-            ResultMessage = $"User '{User.FirstName} {User.LastName}' added successfully!";
-            User = new User();
+                // Convert errors to a string for display
+                StringBuilder errorMessages = new StringBuilder();
+                foreach (var error in errors)
+                {
+                    errorMessages.AppendLine($"Field: {error.Field}");
+                    foreach (var message in error.ErrorMessages)
+                    {
+                        errorMessages.AppendLine($"- {message}");
+                    }
+                }
+
+                ResultMessage = $"Validation Errors: {errorMessages.ToString()}";
+                return Page();
+            }*/
+
+            if (string.IsNullOrEmpty (NewUser.FirstName) || string.IsNullOrEmpty (NewUser.LastName)
+                || string.IsNullOrEmpty (NewUser.Email) || string.IsNullOrEmpty(NewUser.Email))
+                return Page();
+
+
+            // Hash the password before saving to the database
+            NewUser.PasswordHash = SecurityHelper.HashPassword(NewUser.PasswordHash);
+            await _dataAccess.AddUserAsync(NewUser);
+            ResultMessage = $"User '{NewUser.FirstName} {NewUser.LastName}' added successfully!";
+            NewUser = new User(); // Reset the User model for the next input
+            ModelState.Clear(); // Ensure tha the newuser object and the modelstate is clear
             return Page();
         }
 
@@ -65,13 +95,13 @@ namespace Assettmanagement.Pages.Admin
 
         public async Task<IActionResult> OnPostImportUsersAsync()
         {
-            if (File == null || File.Length == 0)
+            if (ImportFile == null || ImportFile.Length == 0)
             {
                 ModelState.AddModelError("File", "Please choose a valid CSV file.");
                 return Page();
             }
 
-            using var reader = new StreamReader(File.OpenReadStream());
+            using var reader = new StreamReader(ImportFile.OpenReadStream());
             using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
 
             var newUsers = csv.GetRecords<User>().ToList();

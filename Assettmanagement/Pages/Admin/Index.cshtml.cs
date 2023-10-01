@@ -35,9 +35,7 @@ namespace Assettmanagement.Pages.Admin
         {
             //Assets = await _dataAccess.GetAssetsWithUsersAsync();
             Assets = await _dataAccess.GetFilteredAssetsAsync(SelectedAssetType);
-
             Users = await _dataAccess.GetUsersAsync();
-
             return Page();
         }
 
