@@ -1,5 +1,8 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+@{
+    var userName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+}
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -40,8 +43,8 @@
                             </a>
                             <div class="dropdown-menu" aria-labelledby="adminDropdown">
                                 <a class="dropdown-item" asp-area="" asp-page="/Admin/Index">Review All</a>
-                                <a class="dropdown-item" asp-area="" asp-page="/Admin/AddAsset">Add Asset</a>
-                                <a class="dropdown-item" asp-area="" asp-page="/Admin/AddUser">Add User</a>
+                                <a class="dropdown-item" asp-area="" asp-page="/Admin/AddAsset">Manage Assets</a>
+                                <a class="dropdown-item" asp-area="" asp-page="/Admin/AddUser">Manage Users</a>
                             </div>
                         </li>
                         }
@@ -60,7 +63,8 @@
                 </div>
                 @if (Context.User.Identity.IsAuthenticated)
                 {
-                    <a href="/Logout" class="btn btn-danger position-absolute" style="top: 10px; right: 10px;">Logout</a>
+                    <span style="padding-right: 10px;"><a href="/ChangePassword">@userName</span>
+                    <a href="/Logout" class="btn btn-danger">Logout</a>
                 }
 
             </div>

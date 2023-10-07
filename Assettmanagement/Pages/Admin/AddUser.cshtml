@@ -3,32 +3,36 @@
 @{
     ViewData["Title"] = "Add or Update User";
 }
+<style>
+    hr {
+        border-top: 3px solid #ccc;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+</style>
 
 <div class="container">
     <h2>@(Model.IsEditMode ? "Update User" : "Add User")</h2>
-
+    <button type="button" class="btn btn-secondary"
+            onclick="window.location.href='?IsEditMode=@(!Model.IsEditMode)'">
+        Switch to @(Model.IsEditMode ? "Add" : "Edit") User Mode
+    </button>
+    <!-- Form for user Dropdownlist -->
     @if (Model.IsEditMode)
     {
         <form method="post">
             <div class="form-group">
-        <label>Select User to Edit</label>
+                <label>Select User to Edit</label>
                 <select asp-for="SelectedUserId" asp-items="Model.UserList" class="form-control" onchange="document.forms[0].submit();">
                     <option value="0">-- Select User --</option>
                 </select>
-    </div>
-        <button type="submit" asp-page-handler="DeleteUser" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this user?');">Delete User</button>
-    </form>
+            </div>
+            <input type="hidden" asp-for="IsEditMode" />
+            <button type="submit" asp-page-handler="DeleteUser" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this user?');">Delete User</button>
+        </form>
     }
-    @if (Model.IsEditMode)
-    {
-        <button type="button" class="btn btn-secondary" onclick="window.location.href='?IsEditMode=False'">Switch to Add User Mode</button>
-    }
-    else
-    {
-        <button type="button" class="btn btn-secondary" onclick="window.location.href='?IsEditMode=True'">Switch to Edit User Mode</button>
-    }
-
-    <form method="post" asp-page-handler="SaveUser">
+    <!-- Form for users Dataentry -->
+        <form method="post" asp-page-handler="SaveUser">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
         <input asp-for="NewUser.Id" type="hidden" />
@@ -62,22 +66,18 @@
             <input asp-for="NewUser.IsAdministrator" type="checkbox" />
             <span asp-validation-for="NewUser.IsAdministrator" class="text-danger"></span>
         </div>
-
-        @if (Model.IsEditMode)
-        {
-            <button type="submit" class="btn btn-primary">Update User</button>
-
-        }
-        else
-        {
-            <button type="submit" class="btn btn-primary">Add New User</button>
-        }
+        <!-- Foce IsEditMode to be passed to the On event -->
+        <input type="hidden" asp-for="IsEditMode" />
+        <button type="submit" class="btn btn-primary">
+            @(Model.IsEditMode ? "Update User" : "Add New User")
+        </button>
     </form>
 
     <!-- Form for Exporting users -->
-
     <form method="post" asp-page-handler="ExportUsers">
+        <hr />
         <p></p>
+        <input type="hidden" asp-for="IsEditMode" />
         <button type="submit" class="btn btn-primary">Export Users</button>
     </form>
 
@@ -87,9 +87,11 @@
             <label for="importUsersFile">Import Users (CSV):</label>
             <input type="file" id="importUsersFile" asp-for="ImportFile" class="form-control-file" />
         </div>
+        <input type="hidden" asp-for="IsEditMode" />
         <button type="submit" class="btn btn-primary">Import Users</button>
     </form>
 
+    <!-- Prompt area -->
     @if (!string.IsNullOrEmpty(Model.ResultMessage))
     {
         <div class="alert alert-info mt-3">@Model.ResultMessage</div>

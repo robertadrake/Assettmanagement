@@ -48,8 +48,8 @@ namespace Assettmanagement.Pages
                 {
                     var claims = new List<Claim>
                     {
-                        //new Claim(ClaimTypes.Name, user.LastName),
-                        // Add other claims as needed
+                        new Claim(ClaimTypes.Name, user.FirstName + " " + user.LastName),
+                        new Claim(ClaimTypes.Email, user.Email),
                         new Claim("IsAdministrator", user.IsAdministrator ? "true" : "false")
                     };
 

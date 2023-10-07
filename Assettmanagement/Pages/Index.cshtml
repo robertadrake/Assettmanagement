@@ -37,7 +37,7 @@
                 <th style="width: 10%;">Serial Number</th>
                 <th style="width: 10%;">Asset Number</th>
                 <th style="width: 10%;">Location</th>
-                <th style="width: 15%;">Assigned To</th>
+                <!--<th style="width: 15%;">Assigned To</th> !-->
               <!--  <th style="width: 5%;">Action</th> !-->
             </tr>
         </thead>
@@ -55,7 +55,7 @@
                         <td style="width: 10%;">@asset.SerialNumber</td>
                         <td style="width: 10%;">@asset.AssetNumber</td>
                         <td style="width: 10%;">@asset.Location</td>
-                        <td style="width: 15%;">
+                        <!--<td style="width: 15%;">
                             @if (asset.User != null)
                             {
                                 @asset.User.FirstName @asset.User.LastName
@@ -64,7 +64,7 @@
                             {
                                 @:Not assigned
                             }
-                        </td>
+                        </td> !-->
                         <!-- <td style="width: 5%;">
                             <form method="post" asp-page-handler="DeleteAsset">
                                 <input type="hidden" asp-for="SelectedAssetId" value="@asset.Id" />

@@ -614,9 +614,9 @@ namespace Assettmanagement.Data
                                 Id = reader.GetInt32(0),
                                 FirstName = reader.GetString(1),
                                 LastName = reader.GetString(2),
-                                Email = reader.IsDBNull(3) ? null : reader.GetString(3),
-                                PasswordHash = reader.IsDBNull(4) ? null : reader.GetString(4),
-                                IsAdministrator = reader.IsDBNull(5) ? false : reader.GetBoolean(5)
+                                Email = reader.GetString(3),
+                                PasswordHash = reader.GetString(4),
+                                IsAdministrator = reader.GetBoolean(5)
                             };
 
                             return user;
@@ -675,6 +675,54 @@ namespace Assettmanagement.Data
                 return systemUser;
             }
         }
+
+
+        public async Task<List<Asset>> GetAssetsByUserEmailAsync(string email, string assetType)
+        {
+            using (var connection = _accessDatabase.GetConnection())
+            {
+                var query = @"SELECT a.* FROM Assets a 
+                      INNER JOIN Users u ON a.UserId = u.Id 
+                      WHERE u.Email = @Email";
+
+                if (!string.IsNullOrEmpty(assetType))
+                {
+                    query += " AND a.AssetType = @AssetType";
+                }
+
+                using (var command = new SqliteCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Email", email);
+                    if (!string.IsNullOrEmpty(assetType))
+                    {
+                        command.Parameters.AddWithValue("@AssetType", assetType);
+                    }
+
+                    var assets = new List<Asset>();
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            var asset = new Asset
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Name = reader.GetString(reader.GetOrdinal("Name")),
+                                Description = reader.GetString(reader.GetOrdinal("Description")),
+                                SerialNumber = reader.GetString(reader.GetOrdinal("SerialNumber")),
+                                AssetNumber = reader.GetString(reader.GetOrdinal("AssetNumber")),
+                                Location = reader.GetString(reader.GetOrdinal("Location")),
+                                AssetType = reader.GetString(reader.GetOrdinal("AssetType")),
+                                UserId = reader.IsDBNull(reader.GetOrdinal("UserId")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("UserId"))
+                            };
+                            assets.Add(asset);
+                        }
+                    }
+                    return assets;
+                }
+            }
+        }
+
+
         public async Task<List<Asset>> GetFilteredAssetsAsync(string assetType)
         {
             List<Asset> assets = new List<Asset>();

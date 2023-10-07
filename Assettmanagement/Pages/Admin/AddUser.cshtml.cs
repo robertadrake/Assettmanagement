@@ -28,21 +28,26 @@ namespace Assettmanagement.Pages.Admin
 
         [BindProperty]
         public User NewUser { get; set; }
-
         [BindProperty]
         public IFormFile ImportFile { get; set; }
         [BindProperty(SupportsGet = true)]
         public int SelectedUserId { get; set; }
         public SelectList UserList { get; set; }
+        [BindProperty]
         public string ResultMessage { get; set; }
-
         [BindProperty(SupportsGet = true)] 
-        public bool IsEditMode { get; set; } = false;
+        public bool IsEditMode { get; set; }
 
         public async Task OnGetAsync(bool reset = false)
         {
             var users = await _dataAccess.GetUsersAsync();
-            UserList = new SelectList(users, "Id", "LastName");
+
+            if (TempData["ResultMessage"] != null)
+            {
+                ResultMessage = TempData["ResultMessage"].ToString();
+            }
+
+            UserList = new SelectList(users, "Id", "LastName", "FirstName");
             if (SelectedUserId > 0 && !reset)
             {
                 NewUser = users.FirstOrDefault(u => u.Id == SelectedUserId);
@@ -54,9 +59,9 @@ namespace Assettmanagement.Pages.Admin
             if (SelectedUserId > 0)
             {
                 NewUser = await _dataAccess.GetUserByIdAsync(SelectedUserId);
-                return RedirectToPage(new { SelectedUserId = SelectedUserId });
+                return RedirectToPage(new { SelectedUserId = SelectedUserId, IsEditMode = IsEditMode });
             }
-            return Page();
+            return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostDeleteUserAsync()
@@ -65,15 +70,15 @@ namespace Assettmanagement.Pages.Admin
             {
                 await _dataAccess.DeleteUserAsync(SelectedUserId);
                 // Optionally reset the NewUser model and SelectedUserId
-                ResultMessage = $"User '{NewUser.FirstName} {NewUser.LastName}' deleted successfully!";
+                TempData["ResultMessage"] = $"User '{NewUser.FirstName} {NewUser.LastName}' deleted successfully!";
                 NewUser = new User();
                 SelectedUserId = 0;
             }
             else
             {
-                ResultMessage = "Invalid User index";
+                TempData["ResultMessage"] = "Invalid User index";
             }
-            return RedirectToPage();
+            return RedirectToPage(new { SelectedUserId = SelectedUserId, IsEditMode = IsEditMode });
         }
 
         public async Task<IActionResult> OnPostSaveUserAsync()
@@ -81,39 +86,39 @@ namespace Assettmanagement.Pages.Admin
             // Remove ImportFile validation if not importing users
             ModelState.Remove("ImportFile");
             ModelState.Remove("NewUser.Id");
+            ModelState.Remove("ResultMessage");
             if (!ModelState.IsValid)
-                return Page();
+                return RedirectToPage(new { SelectedUserId = SelectedUserId, IsEditMode = IsEditMode });
 
             NewUser.PasswordHash = SecurityHelper.HashPassword(NewUser.PasswordHash);
 
             if (!IsEditMode) // New user
             {
                 await _dataAccess.AddUserAsync(NewUser);
-                ResultMessage = $"User '{NewUser.FirstName} {NewUser.LastName}' added successfully!";
+                TempData["ResultMessage"] = $"User '{NewUser.FirstName} {NewUser.LastName}' added successfully!";
+                NewUser = new User(); // Reset the User model for the next input
+                ModelState.Clear(); // Ensure that the NewUser object and the ModelState are clear
             }
             else // Update existing user
             {
                 await _dataAccess.UpdateUserAsync(NewUser);
-                ResultMessage = $"User '{NewUser.FirstName} {NewUser.LastName}' updated successfully!";
+                TempData["ResultMessage"] = $"User '{NewUser.FirstName} {NewUser.LastName}' updated successfully!";
             }
-
-            NewUser = new User(); // Reset the User model for the next input
-            ModelState.Clear(); // Ensure that the NewUser object and the ModelState are clear
-            return Page();
+            return RedirectToPage(new { SelectedUserId = SelectedUserId, IsEditMode = IsEditMode });
         }
 
         public async Task<IActionResult> OnGetEditAsync(int userId)
         {
             NewUser = await _dataAccess.GetUserByIdAsync(userId);
-            return Page();
+            return RedirectToPage(new { SelectedUserId = SelectedUserId, IsEditMode = IsEditMode });
         }
 
         public async Task<IActionResult> OnPostImportUsersAsync()
         {
             if (ImportFile == null || ImportFile.Length == 0)
             {
-                ResultMessage = "No file selected for import.";
-                return Page();
+                TempData["ResultMessage"] = "No file selected for import.";
+                return RedirectToPage(new { SelectedUserId = SelectedUserId, IsEditMode = IsEditMode });
             }
 
             using (var reader = new StreamReader(ImportFile.OpenReadStream()))
@@ -127,8 +132,8 @@ namespace Assettmanagement.Pages.Admin
                 }
             }
 
-            ResultMessage = "Users imported successfully!";
-            return Page();
+            TempData["ResultMessage"] = "Users imported successfully!";
+            return RedirectToPage(new { SelectedUserId = SelectedUserId, IsEditMode = IsEditMode });
         }
 
         public async Task<IActionResult> OnPostExportUsersAsync()

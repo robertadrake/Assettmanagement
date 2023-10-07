@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Assettmanagement.Data;
 using Assettmanagement.Models;
@@ -23,7 +24,22 @@ namespace Assettmanagement.Pages
 
         public async Task<IActionResult> OnGetAsync()
         {
-            Assets = await _dataAccess.GetFilteredAssetsAsync(SelectedAssetType);
+            // needs to show either my assets or if admin then all the assets
+          //  if (User.HasClaim(ClaimTypes.Role, "Administrator"))
+//            {
+                //Assets = await _dataAccess.GetFilteredAssetsAsync(SelectedAssetType);
+            //}
+            //else
+            //{
+                var emailClaim = User.FindFirst(ClaimTypes.Email);
+                if (emailClaim == null)
+                {
+                    // Handle error - claim not found
+                    return Page();
+                }
+                var email = emailClaim.Value;
+                Assets = await _dataAccess.GetAssetsByUserEmailAsync(email, SelectedAssetType);
+            //}
             return Page();
         }
 
