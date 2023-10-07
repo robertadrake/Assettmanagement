@@ -48,8 +48,9 @@ namespace Assettmanagement.Pages
                 {
                     var claims = new List<Claim>
                     {
-                        new Claim(ClaimTypes.Name, user.LastName),
+                        //new Claim(ClaimTypes.Name, user.LastName),
                         // Add other claims as needed
+                        new Claim("IsAdministrator", user.IsAdministrator ? "true" : "false")
                     };
 
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

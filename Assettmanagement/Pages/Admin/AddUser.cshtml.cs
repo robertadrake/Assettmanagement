@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Assettmanagement.Pages.Admin
 {
-    [Authorize(Policy = "SpecificUserOnly")]
+    [Authorize(Policy = "AdministratorOnly")]
     public class AddUserModel : PageModel
     {
         private readonly DataAccess _dataAccess;
@@ -41,32 +41,6 @@ namespace Assettmanagement.Pages.Admin
 
         public async Task<IActionResult> OnPostAsync()
         {
-          /*  if (!ModelState.IsValid)
-            {
-                // Collect validation errors
-                var errors = ModelState
-                    .Where(x => x.Value.Errors.Count > 0)
-                    .Select(x => new
-                    {
-                        Field = x.Key,
-                        ErrorMessages = x.Value.Errors.Select(e => e.ErrorMessage).ToList()
-                    }).ToList();
-
-                // Convert errors to a string for display
-                StringBuilder errorMessages = new StringBuilder();
-                foreach (var error in errors)
-                {
-                    errorMessages.AppendLine($"Field: {error.Field}");
-                    foreach (var message in error.ErrorMessages)
-                    {
-                        errorMessages.AppendLine($"- {message}");
-                    }
-                }
-
-                ResultMessage = $"Validation Errors: {errorMessages.ToString()}";
-                return Page();
-            }*/
-
             if (string.IsNullOrEmpty (NewUser.FirstName) || string.IsNullOrEmpty (NewUser.LastName)
                 || string.IsNullOrEmpty (NewUser.Email) || string.IsNullOrEmpty(NewUser.Email))
                 return Page();

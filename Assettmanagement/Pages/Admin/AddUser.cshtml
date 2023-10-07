@@ -33,6 +33,12 @@
         <span asp-validation-for="NewUser.PasswordHash" class="text-danger"></span>
     </div>
 
+    <div class="form-group">
+        <label asp-for="NewUser.IsAdministrator">Is Administrator</label>
+        <input asp-for="NewUser.IsAdministrator" type="checkbox" />
+        <span asp-validation-for="NewUser.IsAdministrator" class="text-danger"></span>
+    </div>
+
     <button type="submit" asp-page-handler="OnPost" class="btn btn-primary">Add User</button>
     <button type="submit" asp-page-handler="ExportUsers" class="btn btn-primary">Export Users</button>
 

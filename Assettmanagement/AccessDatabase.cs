@@ -38,7 +38,10 @@ namespace Assettmanagement.Database
                 CREATE TABLE IF NOT EXISTS Users (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     FirstName TEXT NOT NULL,
-                    LastName TEXT NOT NULL
+                    LastName TEXT NOT NULL,
+                    Email TEXT,
+                    PasswordHash TEXT, 
+                    IsAdministrator INTEGER
                 );
                 ";
                 string createAssetHistoryTableQuery = @"

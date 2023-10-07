@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Assettmanagement.Pages.Admin
 {
-    [Authorize(Policy = "SpecificUserOnly")]
+    [Authorize(Policy = "AdministratorOnly")]
     public class AddAssetModel : PageModel
     {
         private readonly DataAccess _dataAccess;

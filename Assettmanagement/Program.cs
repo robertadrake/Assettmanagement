@@ -9,7 +9,7 @@ using Microsoft.Extensions.Hosting;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.WebHost.UseUrls("http://*:5000", "https://*:5001");
 // Add services to the container.
 builder.Services.AddTransient<AccessDatabase>();
 builder.Services.AddTransient<DataAccess>();
@@ -21,7 +21,8 @@ builder.Services.AddRazorPages(options =>
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("SpecificUserOnly", policy => policy.RequireClaim(ClaimTypes.Name, "System"));
+  //options.AddPolicy("SpecificUserOnly", policy => policy.RequireClaim(ClaimTypes.Name, "System"));
+    options.AddPolicy("AdministratorOnly", policy => policy.RequireClaim("IsAdministrator", "true"));
 });
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie();

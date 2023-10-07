@@ -125,7 +125,8 @@ namespace Assettmanagement.Data
                                 FirstName = reader.GetString(1),
                                 LastName = reader.GetString(2),
                                 Email = reader.IsDBNull(3) ? "NOT SET" : reader.GetString(3),
-                                PasswordHash = reader.IsDBNull(4) ? "" : reader.GetString(4)
+                                PasswordHash = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                                IsAdministrator = reader.GetBoolean(5)
                             });
                         }
                     }
@@ -139,13 +140,13 @@ namespace Assettmanagement.Data
         {
             using (var connection = _accessDatabase.GetConnection())
             {
-                using (var command = new SqliteCommand("INSERT INTO Users (FirstName, LastName, Email, PasswordHash) VALUES (@firstName, @lastName, @email, @passwordHash)", connection))
+                using (var command = new SqliteCommand("INSERT INTO Users (FirstName, LastName, Email, PasswordHash, IsAdministrator) VALUES (@firstName, @lastName, @email, @passwordHash, @IsAdministrator)", connection))
                 {
                     command.Parameters.AddWithValue("@firstName", user.FirstName);
                     command.Parameters.AddWithValue("@lastName", user.LastName);
                     command.Parameters.AddWithValue("@email", user.Email);  // New line
                     command.Parameters.AddWithValue("@passwordHash", user.PasswordHash);  // New line
-
+                    command.Parameters.AddWithValue("@IsAdministrator", user.IsAdministrator);  // New line
                     await command.ExecuteNonQueryAsync();
                 }
 
@@ -170,7 +171,8 @@ namespace Assettmanagement.Data
                                 FirstName = reader.GetString(1),
                                 LastName = reader.GetString(2),
                                 Email = reader.GetString(3),
-                                PasswordHash = reader.GetString(4)
+                                PasswordHash = reader.GetString(4),
+                                IsAdministrator = reader.GetBoolean(5)
                             };
                         }
                     }
@@ -186,13 +188,15 @@ namespace Assettmanagement.Data
         {
             using (var connection = _accessDatabase.GetConnection())
             {
-                using (var command = new SqliteCommand(@"UPDATE Users SET FirstName = @FirstName, LastName = @LastName, Email = @Email, PasswordHash = @PasswordHash WHERE Id = @Id;", connection))
+                using (var command = new SqliteCommand(@"UPDATE Users SET FirstName = @FirstName, LastName = @LastName, Email = @Email, PasswordHash = @PasswordHash, IsAdministrator = @IsAdministrator WHERE Id = @Id;", connection))
                 {
                     command.Parameters.AddWithValue("@firstName", user.FirstName);
                     command.Parameters.AddWithValue("@lastName", user.LastName);
                     command.Parameters.AddWithValue("@Email", user.Email);  // New line
                     command.Parameters.AddWithValue("@PasswordHash", user.PasswordHash);  // New line
+                    command.Parameters.AddWithValue("@IsAdministrator", user.Id);
                     command.Parameters.AddWithValue("@Id", user.Id);
+
 
                     await command.ExecuteNonQueryAsync();
                 }
