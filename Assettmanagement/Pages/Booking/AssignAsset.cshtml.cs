@@ -9,9 +9,9 @@ namespace Assettmanagement.Pages.Booking
 {
     public class AssignAssetModel : PageModel
     {
-        private readonly DataAccess _dataAccess;
+        private readonly IDataAccess _dataAccess;
 
-        public AssignAssetModel(DataAccess dataAccess)
+        public AssignAssetModel(IDataAccess dataAccess)
         {
             _dataAccess = dataAccess;
         }

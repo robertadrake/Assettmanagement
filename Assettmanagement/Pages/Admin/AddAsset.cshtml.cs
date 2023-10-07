@@ -12,9 +12,9 @@ namespace Assettmanagement.Pages.Admin
     [Authorize(Policy = "AdministratorOnly")]
     public class AddAssetModel : PageModel
     {
-        private readonly DataAccess _dataAccess;
+        private readonly IDataAccess _dataAccess;
 
-        public AddAssetModel(DataAccess dataAccess)
+        public AddAssetModel(IDataAccess dataAccess)
         {
             _dataAccess = dataAccess;
         }

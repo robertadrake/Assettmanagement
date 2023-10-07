@@ -11,9 +11,9 @@ namespace Assettmanagement.Pages.Admin
     [Authorize(Policy = "AdministratorOnly")]
     public class IndexModel : PageModel
     {
-        private readonly DataAccess _dataAccess;
+        private readonly IDataAccess _dataAccess;
 
-        public IndexModel(DataAccess dataAccess)
+        public IndexModel(IDataAccess dataAccess)
         {
             _dataAccess = dataAccess;
         }

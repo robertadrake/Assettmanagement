@@ -4,11 +4,11 @@ using Microsoft.Data.Sqlite;
 
 namespace Assettmanagement.Data
 {
-    public class DataAccess
+    public class IDataAccess
     {
         private readonly AccessDatabase _accessDatabase;
 
-        public DataAccess(AccessDatabase accessDatabase)
+        public IDataAccess(AccessDatabase accessDatabase)
         {
             _accessDatabase = accessDatabase;
         }
@@ -188,15 +188,14 @@ namespace Assettmanagement.Data
         {
             using (var connection = _accessDatabase.GetConnection())
             {
-                using (var command = new SqliteCommand(@"UPDATE Users SET FirstName = @FirstName, LastName = @LastName, Email = @Email, PasswordHash = @PasswordHash, IsAdministrator = @IsAdministrator WHERE Id = @Id;", connection))
+                using (var command = new SqliteCommand("UPDATE Users SET FirstName = @firstName, LastName = @lastName, Email = @email, PasswordHash = @passwordHash, IsAdministrator = @isAdministrator WHERE Id = @id", connection))
                 {
                     command.Parameters.AddWithValue("@firstName", user.FirstName);
                     command.Parameters.AddWithValue("@lastName", user.LastName);
-                    command.Parameters.AddWithValue("@Email", user.Email);  // New line
-                    command.Parameters.AddWithValue("@PasswordHash", user.PasswordHash);  // New line
-                    command.Parameters.AddWithValue("@IsAdministrator", user.Id);
-                    command.Parameters.AddWithValue("@Id", user.Id);
-
+                    command.Parameters.AddWithValue("@email", user.Email);
+                    command.Parameters.AddWithValue("@passwordHash", user.PasswordHash);
+                    command.Parameters.AddWithValue("@isAdministrator", user.IsAdministrator);
+                    command.Parameters.AddWithValue("@id", user.Id);
 
                     await command.ExecuteNonQueryAsync();
                 }
@@ -615,7 +614,9 @@ namespace Assettmanagement.Data
                                 Id = reader.GetInt32(0),
                                 FirstName = reader.GetString(1),
                                 LastName = reader.GetString(2),
-                                // Add any other User properties you have in your model
+                                Email = reader.IsDBNull(3) ? null : reader.GetString(3),
+                                PasswordHash = reader.IsDBNull(4) ? null : reader.GetString(4),
+                                IsAdministrator = reader.IsDBNull(5) ? false : reader.GetBoolean(5)
                             };
 
                             return user;

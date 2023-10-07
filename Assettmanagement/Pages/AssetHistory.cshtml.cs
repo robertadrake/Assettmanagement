@@ -9,9 +9,9 @@ namespace Assettmanagement.Pages
 {
     public class AssetHistoryModel : PageModel
     {
-        private readonly DataAccess _dataAccess;
+        private readonly IDataAccess _dataAccess;
 
-        public AssetHistoryModel(DataAccess dataAccess)
+        public AssetHistoryModel(IDataAccess dataAccess)
         {
             _dataAccess = dataAccess;
         }

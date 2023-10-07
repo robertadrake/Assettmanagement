@@ -10,12 +10,12 @@ namespace Assettmanagement.Pages
     public class IndexModel : PageModel
     {
         private readonly ILogger<IndexModel> _logger;
-        private readonly DataAccess _dataAccess;
+        private readonly IDataAccess _dataAccess;
         [BindProperty(SupportsGet = true)]
         public string SelectedAssetType { get; set; }
         [BindProperty]
         public int SelectedAssetId { get; set; }
-        public IndexModel(DataAccess dataAccess)
+        public IndexModel(IDataAccess dataAccess)
         {
             _dataAccess = dataAccess;
         }

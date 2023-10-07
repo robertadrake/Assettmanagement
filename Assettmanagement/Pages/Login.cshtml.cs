@@ -22,10 +22,10 @@ namespace Assettmanagement.Pages
         [Required]
         public string Password { get; set; }
         public string ResultMessage { get; set; }
-        private readonly DataAccess _dataAccess;
+        private readonly IDataAccess _dataAccess;
         //private readonly IDataAccess _dataAccess; // Assuming you have an IDataAccess interface for database operations
 
-        public LoginModel(DataAccess dataAccess)
+        public LoginModel(IDataAccess dataAccess)
         {
             _dataAccess = dataAccess;
         }

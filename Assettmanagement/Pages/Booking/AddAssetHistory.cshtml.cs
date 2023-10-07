@@ -12,10 +12,10 @@ namespace Assettmanagement.Pages.Booking
 {
     public class AddAssetHistoryModel : PageModel
     {
-        private readonly DataAccess _dataAccess;
+        private readonly IDataAccess _dataAccess;
         public List<AssetHistory> AssetHistories { get; set; }
 
-        public AddAssetHistoryModel(DataAccess dataAccess)
+        public AddAssetHistoryModel(IDataAccess dataAccess)
         {
             _dataAccess = dataAccess;
         }

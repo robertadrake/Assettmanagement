@@ -10,12 +10,12 @@ namespace Assettmanagement.Pages.Booking
 {
     public class ReturnAssetModel : PageModel
     {
-        private readonly DataAccess _dataAccess;
+        private readonly IDataAccess _dataAccess;
         [BindProperty(SupportsGet = true)]
         public string SelectedAssetType { get; set; }
         [BindProperty]
         public int SelectedAssetId { get; set; }
-        public ReturnAssetModel(DataAccess dataAccess)
+        public ReturnAssetModel(IDataAccess dataAccess)
         {
             _dataAccess = dataAccess;
         }

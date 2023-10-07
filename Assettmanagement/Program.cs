@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls("http://*:5000", "https://*:5001");
 // Add services to the container.
 builder.Services.AddTransient<AccessDatabase>();
-builder.Services.AddTransient<DataAccess>();
+builder.Services.AddTransient<IDataAccess>();
 //builder.Services.AddRazorPages();
 builder.Services.AddRazorPages(options =>
 {

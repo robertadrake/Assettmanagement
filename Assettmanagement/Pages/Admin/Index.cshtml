@@ -81,38 +81,3 @@
         </table>
     </div>
 </div>
-
-<h2">
-    Users</h2>
-    <div style="display: inline-block;">
-        <table class="table" style="width: 100%;">
-            <thead>
-                <tr>
-                    <th style="width: 7%;">ID</th>
-                    <th style="width: 25%;">First Name</th>
-                    <th style="width: 25%;">Last Name</th>
-                    <th style="width: 7%;">Action</th>
-                </tr>
-            </thead>
-        </table>
-        <div class="scrollable-table">
-            <table class="table">
-                <tbody>
-@foreach (var user in Model.Users)
-{
-                        <tr>
-                            <td style="width: 7%;">@user.Id</td>
-                            <td style="width: 25%;">@user.FirstName</td>
-                            <td style="width: 25%;">@user.LastName</td>
-                            <td style="width: 7%;">
-                                <form method="post" asp-page-handler="DeleteUser">
-                                    <input type="hidden" asp-for="SelectedUserId" value="@user.Id" />
-                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-}
-                </tbody>
-            </table>
-        </div>
-    </div>

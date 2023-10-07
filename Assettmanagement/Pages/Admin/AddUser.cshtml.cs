@@ -12,129 +12,142 @@ using CsvHelper.Configuration;
 using System.Formats.Asn1;
 using Assettmanagement.Security;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Assettmanagement.Pages.Admin
 {
     [Authorize(Policy = "AdministratorOnly")]
     public class AddUserModel : PageModel
     {
-        private readonly DataAccess _dataAccess;
+        private readonly IDataAccess _dataAccess;
 
-        public AddUserModel(DataAccess dataAccess)
+        public AddUserModel(IDataAccess dataAccess)
         {
             _dataAccess = dataAccess;
         }
 
-       // [BindProperty]
-        public IFormFile ImportFile { get; set; }
-
         [BindProperty]
         public User NewUser { get; set; }
 
-        [TempData]
+        [BindProperty]
+        public IFormFile ImportFile { get; set; }
+        [BindProperty(SupportsGet = true)]
+        public int SelectedUserId { get; set; }
+        public SelectList UserList { get; set; }
         public string ResultMessage { get; set; }
 
-        public IActionResult OnGet()
+        [BindProperty(SupportsGet = true)] 
+        public bool IsEditMode { get; set; } = false;
+
+        public async Task OnGetAsync(bool reset = false)
         {
-            return Page();
+            var users = await _dataAccess.GetUsersAsync();
+            UserList = new SelectList(users, "Id", "LastName");
+            if (SelectedUserId > 0 && !reset)
+            {
+                NewUser = users.FirstOrDefault(u => u.Id == SelectedUserId);
+            }
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (string.IsNullOrEmpty (NewUser.FirstName) || string.IsNullOrEmpty (NewUser.LastName)
-                || string.IsNullOrEmpty (NewUser.Email) || string.IsNullOrEmpty(NewUser.Email))
-                return Page();
-
-
-            // Hash the password before saving to the database
-            NewUser.PasswordHash = SecurityHelper.HashPassword(NewUser.PasswordHash);
-            await _dataAccess.AddUserAsync(NewUser);
-            ResultMessage = $"User '{NewUser.FirstName} {NewUser.LastName}' added successfully!";
-            NewUser = new User(); // Reset the User model for the next input
-            ModelState.Clear(); // Ensure tha the newuser object and the modelstate is clear
+            if (SelectedUserId > 0)
+            {
+                NewUser = await _dataAccess.GetUserByIdAsync(SelectedUserId);
+                return RedirectToPage(new { SelectedUserId = SelectedUserId });
+            }
             return Page();
         }
 
-        //  USer import ----
-        public async Task<IActionResult> OnPostExportUsersAsync()
+        public async Task<IActionResult> OnPostDeleteUserAsync()
         {
-            var users = await _dataAccess.GetUsersAsync();
-            var stream = new MemoryStream();
-            var writer = new StreamWriter(stream);
-            var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture);
-            csvWriter.WriteRecords(users);
-            await writer.FlushAsync();
-            stream.Position = 0;
+            if (SelectedUserId > 0)
+            {
+                await _dataAccess.DeleteUserAsync(SelectedUserId);
+                // Optionally reset the NewUser model and SelectedUserId
+                ResultMessage = $"User '{NewUser.FirstName} {NewUser.LastName}' deleted successfully!";
+                NewUser = new User();
+                SelectedUserId = 0;
+            }
+            else
+            {
+                ResultMessage = "Invalid User index";
+            }
+            return RedirectToPage();
+        }
 
-            return File(stream, "text/csv", "users.csv");
+        public async Task<IActionResult> OnPostSaveUserAsync()
+        {
+            // Remove ImportFile validation if not importing users
+            ModelState.Remove("ImportFile");
+            ModelState.Remove("NewUser.Id");
+            if (!ModelState.IsValid)
+                return Page();
+
+            NewUser.PasswordHash = SecurityHelper.HashPassword(NewUser.PasswordHash);
+
+            if (!IsEditMode) // New user
+            {
+                await _dataAccess.AddUserAsync(NewUser);
+                ResultMessage = $"User '{NewUser.FirstName} {NewUser.LastName}' added successfully!";
+            }
+            else // Update existing user
+            {
+                await _dataAccess.UpdateUserAsync(NewUser);
+                ResultMessage = $"User '{NewUser.FirstName} {NewUser.LastName}' updated successfully!";
+            }
+
+            NewUser = new User(); // Reset the User model for the next input
+            ModelState.Clear(); // Ensure that the NewUser object and the ModelState are clear
+            return Page();
+        }
+
+        public async Task<IActionResult> OnGetEditAsync(int userId)
+        {
+            NewUser = await _dataAccess.GetUserByIdAsync(userId);
+            return Page();
         }
 
         public async Task<IActionResult> OnPostImportUsersAsync()
         {
             if (ImportFile == null || ImportFile.Length == 0)
             {
-                ModelState.AddModelError("File", "Please choose a valid CSV file.");
+                ResultMessage = "No file selected for import.";
                 return Page();
             }
 
-            using var reader = new StreamReader(ImportFile.OpenReadStream());
-            using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
-
-            var newUsers = csv.GetRecords<User>().ToList();
-            var existingUsers = await _dataAccess.GetUsersAsync();
-
-            // Find users to delete
-            var usersToDelete = existingUsers.Except(newUsers, new UserComparer()).ToList();
-
-            // Find users to add
-            var usersToAdd = newUsers.Except(existingUsers, new UserComparer()).ToList();
-
-            // Find users to update
-            var usersToUpdate = newUsers.Intersect(existingUsers, new UserComparer()).ToList();
-
-            // Check if users have assigned assets before deleting or updating
-            foreach (var user in  usersToDelete.Concat(usersToUpdate))
+            using (var reader = new StreamReader(ImportFile.OpenReadStream()))
+            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
             {
-                var assignedAssets = await _dataAccess.GetAssignedAssetsByUserAsync(user.Id);
-                if (assignedAssets.Any())
+                var records = csv.GetRecords<User>();
+                foreach (var user in records)
                 {
-                    ModelState.AddModelError("File", $"User {user.FirstName} {user.LastName} has assigned assets. Please unassign the assets before importing.");
-                    //return Page();
+                    user.PasswordHash = SecurityHelper.HashPassword(user.PasswordHash);
+                    await _dataAccess.AddUserAsync(user);
                 }
             }
 
-            // Delete users
-            foreach (var user in usersToDelete)
+            ResultMessage = "Users imported successfully!";
+            return Page();
+        }
+
+        public async Task<IActionResult> OnPostExportUsersAsync()
+        {
+            var users = await _dataAccess.GetUsersAsync();
+            var memoryStream = new MemoryStream();
+            using (var writer = new StreamWriter(memoryStream, leaveOpen: true)) // Notice the leaveOpen: true
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
-                await _dataAccess.DeleteUserAsync(user.Id);
+                csv.WriteRecords(users);
             }
 
-            // Add new users
-            foreach (var user in usersToAdd)
+            memoryStream.Position = 0;
+            return new FileStreamResult(memoryStream, "text/csv")
             {
-                await _dataAccess.AddUserAsync(user);
-            }
-
-            // Update existing users
-          /*  foreach (var user in usersToUpdate)
-            {
-                await _dataAccess.UpdateUserAsync(user);
-            }*/
-
-            return RedirectToPage("./AddUser");
+                FileDownloadName = "users.csv"
+            };
         }
 
-    }
-    public class UserComparer : IEqualityComparer<User>
-    {
-        public bool Equals(User x, User y)
-        {
-            return x.Id == y.Id;
-        }
 
-        public int GetHashCode(User obj)
-        {
-            return obj.Id.GetHashCode();
-        }
     }
 }
