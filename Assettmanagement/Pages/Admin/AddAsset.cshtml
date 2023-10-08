@@ -5,12 +5,8 @@
 }
 
 <div class="container">
-    @if (!string.IsNullOrEmpty(Model.ResultMessage2))
-    {
-        <div class="alert alert-info">@Model.ResultMessage2</div>
-    }
 <h2>Add Asset</h2>
-<form method="post">
+    <form method="post" asp-page-handler="SaveAsset">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <div class="form-group">
@@ -43,10 +39,11 @@
     </div>
 
     <div class="form-group">
-        <label asp-for="Asset.AssetNumber">Asset Number</label>
+        <label asp-for="Asset.AssetNumber">Asset Number (Highest: @Model.HighestAssetNumber)</label>
         <input asp-for="Asset.AssetNumber" class="form-control" />
         <span asp-validation-for="Asset.AssetNumber" class="text-danger"></span>
     </div>
+
 
     <div class="form-group">
         <label asp-for="Asset.Location">Location</label>
@@ -54,17 +51,42 @@
         <span asp-validation-for="Asset.Location" class="text-danger"></span>
     </div>
 
+    <div class="form-group">
+        <label for="Quantity">Quantity</label>
+        <input type="number" id="Quantity" asp-for="Quantity" class="form-control" min="1" value="1" />
+        <span asp-validation-for="Quantity" class="text-danger"></span>
+    </div>
+
+
     <button type="submit" class="btn btn-primary">Add Asset</button>
     <tl></tl>
-    <button type="submit" asp-page-handler="ExportAsset" class="btn btn-primary">Export Assets</button>
+        
+    @*<button type="submit" asp-page-handler="ExportAsset" class="btn btn-primary">Export Assets</button>*@
+        <!-- Prompt area -->
+        @if (!string.IsNullOrEmpty(Model.ResultMessage))
+        {
+            <div class="alert alert-info mt-3">@Model.ResultMessage</div>
+        }
 </form>
 
-<form method="post" enctype="multipart/form-data" asp-page-handler="ImportAsset">
-    <div class="form-group">
-            <label for="ImportAsset">Import Assets (CSV):</label>
-            <input type="file" id="ImportAsset" name="file" class="form-control-file" />
-    </div>
-    <button type="submit" class="btn btn-primary">Import Assets</button>
-</form>
-</div>  
+
+
+    <!-- Form for Exporting users -->
+    <form method="post" asp-page-handler="ExportAsset">
+        <hr />
+        <p></p>
+        <button type="submit" class="btn btn-primary">Export Assets</button>
+    </form>
+
+
+    <form method="post" enctype="multipart/form-data" asp-page-handler="ImportAsset">
+        <div class="form-group">
+                <label for="ImportAsset">Import Assets (CSV):</label>
+                <input type="file" id="ImportAsset" name="file" class="form-control-file" />
+        </div>
+        <button type="submit" class="btn btn-primary">Import Assets</button>
+    </form>
+
+</div>
+
 <a asp-page="./Index">Back to Admin</a>

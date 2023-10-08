@@ -18,40 +18,73 @@ namespace Assettmanagement.Pages.Admin
         {
             _dataAccess = dataAccess;
         }
-
+        [BindProperty]
+        public int Quantity { get; set; } = 1;
         [BindProperty]
         public IFormFile File { get; set; }
+        [BindProperty]
+        public int HighestAssetNumber { get; set; }
 
         [BindProperty]
         public Asset Asset { get; set; }
 
-        [TempData]
-        public string ResultMessage2 { get; set; }
+        [BindProperty]
+        public string ResultMessage { get; set; }
 
-        public IActionResult OnGet()
-        {
-            return Page();
-        }
+        //public IActionResult OnGet()
+        //{
 
-        public async Task<IActionResult> OnPostAsync()
-        {
-            if (!ModelState.IsValid)
+        //}
+
+            public async Task OnGetAsync()
             {
-            //    return Page();
+                if (TempData["ResultMessage"] != null)
+                {
+                    ResultMessage = TempData["ResultMessage"].ToString();
+                }
+                HighestAssetNumber = (int)await _dataAccess.GetHighestAssetNumberAsync();
             }
 
-            try
+            public async Task<IActionResult> OnPostSaveAssetAsync()
             {
-                await _dataAccess.AddAssetAsync(Asset);
-                ResultMessage2 = "Asset added successfully!";
-            }
-            catch (System.Exception ex)
-            {
-                ResultMessage2 = $"Error adding asset: {ex.Message}";
+                ModelState.Remove("File");
+                ModelState.Remove("Asset.User");
+                ModelState.Remove("ResultMessage");
+                if (!ModelState.IsValid)
+                {
+                    TempData["ResultMessage"] = ("Missing Data");
+                    return RedirectToPage();
+                }
+
+                HighestAssetNumber = (int)await _dataAccess.GetHighestAssetNumberAsync();
+
+                if (int.Parse(Asset.AssetNumber) <= HighestAssetNumber)
+                {
+                    TempData["ResultMessage"]=("The asset number must be higher than the current highest asset number.");
+                    return RedirectToPage();
+                }
+
+                for (int i = 0; i < Quantity; i++)
+                {
+                    Asset assetToAdd = new Asset
+                    {
+                        Name = Asset.Name,
+                        Description = Asset.Description,
+                        AssetType = Asset.AssetType,
+                        SerialNumber =  Asset.SerialNumber,
+                        AssetNumber = (int.Parse(Asset.AssetNumber) + i).ToString(),   // Increment asset number
+                        Location = Asset.Location
+                    };
+
+                    await _dataAccess.AddAssetAsync(assetToAdd);
+                }
+
+                TempData["ResultMessage"] = $"{Quantity} assets added successfully.";
+                return RedirectToPage();
             }
 
-           return RedirectToPage();
-        }
+
+
 
         public async Task<IActionResult> OnPostExportAssetAsync()
         {
@@ -62,7 +95,7 @@ namespace Assettmanagement.Pages.Admin
             csvWriter.WriteRecords(assets);
             await writer.FlushAsync();
             stream.Position = 0;
-            ResultMessage2 = "Asset saved successfully!";
+            TempData["ResultMessage"] = "Asset saved successfully!";
             return File(stream, "text/csv", "Assets.csv");
         }
 
@@ -71,7 +104,7 @@ namespace Assettmanagement.Pages.Admin
         {
             if (File == null || File.Length == 0)
             {
-                ModelState.AddModelError("File", "Please choose a valid CSV file.");
+                TempData["ResultMessage"]=("File", "Please choose a valid CSV file.");
                 return Page();
             }
 
@@ -96,7 +129,7 @@ namespace Assettmanagement.Pages.Admin
                 var assignedAssets = await _dataAccess.GetAssignedAssetsByUserAsync(Asset.Id);
                 if (assignedAssets.Any())
                 {
-                    ModelState.AddModelError("File", $"Asset is assigned to a user, Please unassign the assets before importing.");
+                    TempData["ResultMessage"]=("File", $"Asset is assigned to a user, Please unassign the assets before importing.");
                     //return Page();
                 }
             }
@@ -118,7 +151,7 @@ namespace Assettmanagement.Pages.Admin
               {
                   await _dataAccess.UpdateAssetAsync(user);
               }*/
-            ResultMessage2 = "Assets Imported successfully!";
+            TempData["ResultMessage"] = "Assets Imported successfully!";
             return RedirectToPage(); 
         }
 

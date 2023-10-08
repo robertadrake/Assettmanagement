@@ -75,6 +75,23 @@ namespace Assettmanagement.Data
             }
         }
 
+        public async Task<int?> GetHighestAssetNumberAsync()
+        {
+            using (var connection = _accessDatabase.GetConnection())
+            {
+                using (var command = new SqliteCommand("SELECT MAX(AssetNumber) FROM Assets", connection))
+                {
+                    var result = await command.ExecuteScalarAsync();
+                    if (result != null && int.TryParse(result.ToString(), out int highestAssetNumber))
+                    {
+                        return highestAssetNumber;
+                    }
+                    return null;
+                }
+            }
+        }
+
+
         public async Task AddAssetAsync(Asset asset)
         {
             using (var connection = _accessDatabase.GetConnection())
