@@ -22,35 +22,32 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand" href="#">Global R&D</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="navbar-collapse collapse">
+                    <ul class="navbar-nav mr-auto">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
+                            <a class="nav-link" asp-area="" asp-page="/Index">Home</a>
                         </li>
-
                         @if (User.HasClaim("IsAdministrator", "true"))
                         {
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Admin
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="adminDropdown">
-                                <a class="dropdown-item" asp-area="" asp-page="/Admin/Index">Review All</a>
-                                <a class="dropdown-item" asp-area="" asp-page="/Admin/AddAsset">Manage Assets</a>
-                                <a class="dropdown-item" asp-area="" asp-page="/Admin/AddUser">Manage Users</a>
-                            </div>
-                        </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Admin
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="adminDropdown">
+                                    <a class="dropdown-item" asp-area="" asp-page="/Admin/Index">Review All</a>
+                                    <a class="dropdown-item" asp-area="" asp-page="/Admin/AddAsset">Manage Assets</a>
+                                    <a class="dropdown-item" asp-area="" asp-page="/Admin/AddUser">Manage Users</a>
+                                </div>
+                            </li>
                         }
-
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" id="bookingDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <a class="nav-link dropdown-toggle" href="#" id="bookingDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 Booking
                             </a>
                             <div class="dropdown-menu" aria-labelledby="bookingDropdown">
@@ -60,15 +57,15 @@
                             </div>
                         </li>
                     </ul>
+                    @if (Context.User.Identity.IsAuthenticated)
+                    {
+                        <span class="navbar-text mr-3">@userName</span>
+                        <a href="/Logout" class="btn btn-danger">Logout</a>
+                    }
                 </div>
-                @if (Context.User.Identity.IsAuthenticated)
-                {
-                    <span style="padding-right: 10px;"><a href="/ChangePassword">@userName</span>
-                    <a href="/Logout" class="btn btn-danger">Logout</a>
-                }
-
             </div>
         </nav>
+
     </header>
     <div class="container">
         <main role="main" class="pb-3">
