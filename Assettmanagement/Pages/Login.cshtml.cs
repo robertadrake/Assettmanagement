@@ -21,6 +21,7 @@ namespace Assettmanagement.Pages
         [BindProperty]
         [Required]
         public string Password { get; set; }
+        [BindProperty]
         public string ResultMessage { get; set; }
         private readonly IDataAccess _dataAccess;
         //private readonly IDataAccess _dataAccess; // Assuming you have an IDataAccess interface for database operations
@@ -32,13 +33,19 @@ namespace Assettmanagement.Pages
 
         public void OnGet()
         {
+            if (TempData["ResultMessage"] != null)
+            {
+                ResultMessage = TempData["ResultMessage"].ToString();
+            }
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
+            ModelState.Remove("ResultMessage");
             if (!ModelState.IsValid)
             {
-                return Page();
+                TempData["ResultMessage"] = "Please enter your email and password.";
+                return RedirectToPage();
             }
 
             var user = await _dataAccess.GetUserByEmailAsync(Email);
@@ -60,14 +67,14 @@ namespace Assettmanagement.Pages
                 }
                 else
                 {
-                    ResultMessage = "Invalid email or password.";
+                    TempData["ResultMessage"] = "Invalid email or password.";
                 }
             }
             catch (Exception ex)
             {
                 ResultMessage = ex.Message;
             }
-            return Page();
+            return RedirectToPage();
         }
     }
 }
