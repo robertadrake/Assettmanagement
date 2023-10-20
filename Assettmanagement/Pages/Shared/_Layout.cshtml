@@ -59,7 +59,7 @@
                     </ul>
                     @if (Context.User.Identity.IsAuthenticated)
                     {
-                        <span class="navbar-text mr-3">@userName</span>
+                        <a href="/ChangePassword" class="navbar-text mr-3">@userName</a>
                         <a href="/Logout" class="btn btn-danger">Logout</a>
                     }
                 </div>

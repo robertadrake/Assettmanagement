@@ -31,60 +31,52 @@ namespace Assettmanagement.Pages.Admin
         [BindProperty]
         public string ResultMessage { get; set; }
 
-        //public IActionResult OnGet()
-        //{
-
-        //}
-
-            public async Task OnGetAsync()
+        public async Task OnGetAsync()
+        {
+            if (TempData["ResultMessage"] != null)
             {
-                if (TempData["ResultMessage"] != null)
-                {
-                    ResultMessage = TempData["ResultMessage"].ToString();
-                }
-                HighestAssetNumber = (int)await _dataAccess.GetHighestAssetNumberAsync();
+                ResultMessage = TempData["ResultMessage"].ToString();
             }
+            HighestAssetNumber = (int)await _dataAccess.GetHighestAssetNumberAsync();
+        }
 
-            public async Task<IActionResult> OnPostSaveAssetAsync()
+        public async Task<IActionResult> OnPostSaveAssetAsync()
+        {
+            ModelState.Remove("File");
+            ModelState.Remove("Asset.User");
+            ModelState.Remove("ResultMessage");
+            if (!ModelState.IsValid)
             {
-                ModelState.Remove("File");
-                ModelState.Remove("Asset.User");
-                ModelState.Remove("ResultMessage");
-                if (!ModelState.IsValid)
-                {
-                    TempData["ResultMessage"] = ("Missing Data");
-                    return RedirectToPage();
-                }
-
-                HighestAssetNumber = (int)await _dataAccess.GetHighestAssetNumberAsync();
-
-                if (int.Parse(Asset.AssetNumber) <= HighestAssetNumber)
-                {
-                    TempData["ResultMessage"]=("The asset number must be higher than the current highest asset number.");
-                    return RedirectToPage();
-                }
-
-                for (int i = 0; i < Quantity; i++)
-                {
-                    Asset assetToAdd = new Asset
-                    {
-                        Name = Asset.Name,
-                        Description = Asset.Description,
-                        AssetType = Asset.AssetType,
-                        SerialNumber =  Asset.SerialNumber,
-                        AssetNumber = (int.Parse(Asset.AssetNumber) + i).ToString(),   // Increment asset number
-                        Location = Asset.Location
-                    };
-
-                    await _dataAccess.AddAssetAsync(assetToAdd);
-                }
-
-                TempData["ResultMessage"] = $"{Quantity} assets added successfully.";
+                TempData["ResultMessage"] = ("Missing Data");
                 return RedirectToPage();
             }
 
+            HighestAssetNumber = (int)await _dataAccess.GetHighestAssetNumberAsync();
 
+            if (int.Parse(Asset.AssetNumber) <= HighestAssetNumber)
+            {
+                TempData["ResultMessage"]=("The asset number must be higher than the current highest asset number.");
+                return RedirectToPage();
+            }
 
+            for (int i = 0; i < Quantity; i++)
+            {
+                Asset assetToAdd = new Asset
+                {
+                    Name = Asset.Name,
+                    Description = Asset.Description,
+                    AssetType = Asset.AssetType,
+                    SerialNumber =  Asset.SerialNumber,
+                    AssetNumber = (int.Parse(Asset.AssetNumber) + i).ToString(),   // Increment asset number
+                    Location = Asset.Location
+                };
+
+                await _dataAccess.AddAssetAsync(assetToAdd);
+            }
+
+            TempData["ResultMessage"] = $"{Quantity} assets added successfully.";
+            return RedirectToPage();
+        }
 
         public async Task<IActionResult> OnPostExportAssetAsync()
         {
