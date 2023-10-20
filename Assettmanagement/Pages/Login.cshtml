@@ -15,6 +15,24 @@
     .wrapper {
         box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* Optional: Adds a subtle shadow to the wrapper */
     }
+
+    .margin-left-right {
+        margin-left: 20px; /* Adjust the value as per your requirement */
+        margin-right: 20px; /* Adjust the value as per your requirement */
+        margin-top: 2px;
+        margin-bottom: 2px;
+    }
+
+    .btn-margin-bottom {
+        margin-bottom: 20px; /* Adjust the value as per your requirement */
+    }
+
+    #icon {
+        width: 350px;
+        height: auto;
+        margin-top: 20px; /* Adjust the value as per your requirement */
+    }
+
 </style>
 <head>
     <meta charset="UTF-8">
@@ -40,11 +58,11 @@
 
                         <br />
                         <!-- Login Form -->
-                        <form method="post" class="d-flex flex-column align-items-center">
+                        <form method="post" class="d-flex flex-column align-items-center margin-left-right">
                             <input type="text" id="Email" class="fadeIn second form-control mb-2" name="Email" placeholder="Email">
                             <input type="password" id="Password" class="fadeIn second form-control mb-2" name="Password" placeholder="Password">
                             <br />
-                            <button type="submit" class="fadeIn fourth btn btn-primary btn-lg">Log In</button>
+                            <button type="submit" class="fadeIn fourth btn btn-primary btn-lg btn-margin-bottom">Log In</button>
                         </form>
 
                         <!-- Prompt area -->

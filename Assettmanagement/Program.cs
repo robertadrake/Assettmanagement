@@ -1,19 +1,28 @@
 using Assettmanagement.Data;
 using Assettmanagement.Database;
 using Assettmanagement.Models;
+using Assettmanagement.Security;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.UseUrls("http://*:5000", "https://*:5001");
+// in the Json file ...builder.WebHost.UseUrls("http://*:5000", "https://*:5001");
 // Add services to the container.
 builder.Services.AddTransient<AccessDatabase>();
 builder.Services.AddTransient<IDataAccess>();
 //builder.Services.AddRazorPages();
+builder.Logging.ClearProviders();
+builder.Logging.AddSimpleConsole(options =>
+{
+    options.SingleLine = true;
+    options.TimestampFormat = "hh:mm:ss ";
+});
+
 builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AuthorizeFolder("/");
@@ -28,7 +37,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie();
 
 var app = builder.Build();
-
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+string SipAddress = SecurityHelper.GetLocalIPAddress();
+logger.LogInformation($"Local IP Address is {SipAddress}.");
 // Create the database if it doesn't exist
 var accessDatabase = app.Services.GetService<AccessDatabase>();
 //accessDatabase.CreateDatabaseIfNotExists();
