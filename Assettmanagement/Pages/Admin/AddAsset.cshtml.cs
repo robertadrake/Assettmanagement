@@ -38,7 +38,7 @@ namespace Assettmanagement.Pages.Admin
                 ResultMessage = TempData["ResultMessage"].ToString();
             }
             var highestAssetNumberResult = await _dataAccess.GetHighestAssetNumberAsync();
-            int highestAssetNumber = highestAssetNumberResult.HasValue ? highestAssetNumberResult.Value : 0; // Default to 0 if null
+            HighestAssetNumber = highestAssetNumberResult.HasValue ? highestAssetNumberResult.Value : 0; // Default to 0 if null
         }
 
         public async Task<IActionResult> OnPostSaveAssetAsync()
@@ -53,7 +53,7 @@ namespace Assettmanagement.Pages.Admin
             }
 
             var highestAssetNumberResult = await _dataAccess.GetHighestAssetNumberAsync();
-            int highestAssetNumber = highestAssetNumberResult.HasValue ? highestAssetNumberResult.Value : 0; // Default to 0 if null
+            HighestAssetNumber = highestAssetNumberResult.HasValue ? highestAssetNumberResult.Value : 0; // Default to 0 if null
 
 
             if ((Asset.AssetNumber) <= HighestAssetNumber)

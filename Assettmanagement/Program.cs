@@ -41,6 +41,7 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<AppDbContext>();
     context.Database.Migrate(); // This will apply any pending migrations and create the database
+                                //     "SQLDatabase": "Data Source=C:\\Users\\admin\\source\\repos\\Assettmanagement\\Assettmanagement\\Database\\Asset.db;"
 }
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 string SipAddress = SecurityHelper.GetLocalIPAddress();

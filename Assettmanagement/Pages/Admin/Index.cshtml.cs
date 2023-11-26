@@ -18,30 +18,22 @@ namespace Assettmanagement.Pages.Admin
             _dataAccess = dataAccess;
         }
         [BindProperty(SupportsGet = true)]
-        public string SelectedAssetType { get; set; }
-
-
+        public string SelectedAssetType { get; set; } 
         public List<Asset> Assets { get; set; }
         public List<User> Users { get; set; }
-
         [BindProperty]
         public int SelectedAssetId { get; set; }
-
         [BindProperty]
         public int SelectedUserId { get; set; }
-
         [TempData]
         public string ResultMessage { get; set; }
-
         public async Task<IActionResult> OnGetAsync()
         {
-            //Assets = await _dataAccess.GetAssetsWithUsersAsync();
             Assets = await _dataAccess.GetFilteredAssetsAsync(SelectedAssetType);
             Users = await _dataAccess.GetUsersAsync();
             return Page();
         }
 
-        //public async Task<IActionResult> OnPostDeleteAssetAsync(int AssetId)
         public async Task<IActionResult> OnPostDeleteAssetAsync(int? SelectedAssetId)
         {
             if (SelectedAssetId != 0) { 

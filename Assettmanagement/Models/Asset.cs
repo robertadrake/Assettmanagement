@@ -30,5 +30,6 @@ namespace Assettmanagement.Models
         // Foreign key for User
         // The '?' denotes that the UserId can be null (asset may not be assigned to a user)
         public int? UserId { get; set; }
+        public DateTime? CalibrationDate { get; set; }
     }
 }

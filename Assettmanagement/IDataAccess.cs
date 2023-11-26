@@ -187,15 +187,15 @@ namespace Assettmanagement.Data
 
         public async Task<List<Asset>> GetFilteredAssetsAsync(string assetType)
         {
-            var query = _context.Assets
-                                .Include(a => a.User);
+            IQueryable<Asset> query = _context.Assets.Include(a => a.User);
 
             if (!string.IsNullOrEmpty(assetType))
             {
-                query = (Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Asset, User>)query.Where(a => a.AssetType == assetType);
+                query = query.Where(a => a.AssetType == assetType);
             }
 
             return await query.ToListAsync();
         }
+
     }
 }

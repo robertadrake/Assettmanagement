@@ -44,6 +44,11 @@
         <span asp-validation-for="Asset.AssetNumber" class="text-danger"></span>
     </div>
 
+    <div class="form-group">
+        <label asp-for="Asset.CalibrationDate">Calibation date</label>
+        <input asp-for="Asset.CalibrationDate" type="date" class="form-control" />
+        <span asp-validation-for="Asset.CalibrationDate" class="text-danger"></span>
+    </div>
 
     <div class="form-group">
         <label asp-for="Asset.Location">Location</label>
