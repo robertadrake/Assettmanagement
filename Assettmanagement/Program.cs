@@ -1,14 +1,7 @@
 using Assettmanagement.Data;
 using Assettmanagement.Database;
-using Assettmanagement.Models;
 using Assettmanagement.Security;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 // in the Json file ...builder.WebHost.UseUrls("http://*:5000", "https://*:5001");
