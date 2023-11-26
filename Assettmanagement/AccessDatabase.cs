@@ -1,7 +1,7 @@
 ﻿using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 
-namespace Assettmanagement.Database
+/*namespace Assettmanagement.Database
 {
     public class AccessDatabase
     {
@@ -70,3 +70,4 @@ namespace Assettmanagement.Database
         }
     }
 }
+*/

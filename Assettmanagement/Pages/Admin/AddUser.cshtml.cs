@@ -1,19 +1,12 @@
-using System.Threading.Tasks;
 using Assettmanagement.Data;
 using Assettmanagement.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.IO;
-using System.Text;
-using Microsoft.AspNetCore.Http;
 using System.Globalization;
 using CsvHelper;
-using CsvHelper.Configuration;
-using System.Formats.Asn1;
 using Assettmanagement.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
-
 namespace Assettmanagement.Pages.Admin
 {
     [Authorize(Policy = "AdministratorOnly")]
@@ -66,17 +59,16 @@ namespace Assettmanagement.Pages.Admin
 
         public async Task<IActionResult> OnPostDeleteUserAsync()
         {
-            if (SelectedUserId > 0)
+            var user = await _dataAccess.GetUserAsync(SelectedUserId);
+
+            if (user != null)
             {
                 await _dataAccess.DeleteUserAsync(SelectedUserId);
-                // Optionally reset the NewUser model and SelectedUserId
-                TempData["ResultMessage"] = $"User '{NewUser.FirstName} {NewUser.LastName}' deleted successfully!";
-                NewUser = new User();
-                SelectedUserId = 0;
+                TempData["ResultMessage"] = $"User '{user.FirstName} {user.LastName}' deleted successfully!";
             }
             else
             {
-                TempData["ResultMessage"] = "Invalid User index";
+                TempData["ResultMessage"] = "User not found";
             }
             return RedirectToPage(new { SelectedUserId = SelectedUserId, IsEditMode = IsEditMode });
         }
@@ -87,8 +79,10 @@ namespace Assettmanagement.Pages.Admin
             ModelState.Remove("ImportFile");
             ModelState.Remove("NewUser.Id");
             ModelState.Remove("ResultMessage");
-            if (!ModelState.IsValid)
-                return RedirectToPage(new { SelectedUserId = SelectedUserId, IsEditMode = IsEditMode });
+            ModelState.Remove("Assets");
+            ModelState.Remove("AssetHistories");
+          //  if (!ModelState.IsValid)
+         //       return RedirectToPage(new { SelectedUserId = SelectedUserId, IsEditMode = IsEditMode });
 
             NewUser.PasswordHash = SecurityHelper.HashPassword(NewUser.PasswordHash);
 
@@ -96,7 +90,7 @@ namespace Assettmanagement.Pages.Admin
             {
                 await _dataAccess.AddUserAsync(NewUser);
                 TempData["ResultMessage"] = $"User '{NewUser.FirstName} {NewUser.LastName}' added successfully!";
-                NewUser = new User(); // Reset the User model for the next input
+ // *** CANT DO THIS NOW ***** NewUser = new User(); // Reset the User model for the next input
                 ModelState.Clear(); // Ensure that the NewUser object and the ModelState are clear
             }
             else // Update existing user

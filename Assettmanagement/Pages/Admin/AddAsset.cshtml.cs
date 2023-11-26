@@ -37,7 +37,8 @@ namespace Assettmanagement.Pages.Admin
             {
                 ResultMessage = TempData["ResultMessage"].ToString();
             }
-            HighestAssetNumber = (int)await _dataAccess.GetHighestAssetNumberAsync();
+            var highestAssetNumberResult = await _dataAccess.GetHighestAssetNumberAsync();
+            int highestAssetNumber = highestAssetNumberResult.HasValue ? highestAssetNumberResult.Value : 0; // Default to 0 if null
         }
 
         public async Task<IActionResult> OnPostSaveAssetAsync()
@@ -51,9 +52,11 @@ namespace Assettmanagement.Pages.Admin
                 return RedirectToPage();
             }
 
-            HighestAssetNumber = (int)await _dataAccess.GetHighestAssetNumberAsync();
+            var highestAssetNumberResult = await _dataAccess.GetHighestAssetNumberAsync();
+            int highestAssetNumber = highestAssetNumberResult.HasValue ? highestAssetNumberResult.Value : 0; // Default to 0 if null
 
-            if (int.Parse(Asset.AssetNumber) <= HighestAssetNumber)
+
+            if ((Asset.AssetNumber) <= HighestAssetNumber)
             {
                 TempData["ResultMessage"]=("The asset number must be higher than the current highest asset number.");
                 return RedirectToPage();
@@ -67,7 +70,7 @@ namespace Assettmanagement.Pages.Admin
                     Description = Asset.Description,
                     AssetType = Asset.AssetType,
                     SerialNumber =  Asset.SerialNumber,
-                    AssetNumber = (int.Parse(Asset.AssetNumber) + i).ToString(),   // Increment asset number
+                    AssetNumber = ((Asset.AssetNumber) + i),   // Increment asset number
                     Location = Asset.Location
                 };
 

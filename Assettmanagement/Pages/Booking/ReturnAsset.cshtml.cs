@@ -1,10 +1,7 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Assettmanagement.Data;
 using Assettmanagement.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Assettmanagement.Models;
 
 namespace Assettmanagement.Pages.Booking
 {

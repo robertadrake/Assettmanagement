@@ -10,7 +10,6 @@ namespace Assettmanagement.Pages
 {
     public class IndexModel : PageModel
     {
-        private readonly ILogger<IndexModel> _logger;
         private readonly IDataAccess _dataAccess;
         [BindProperty(SupportsGet = true)]
         public string SelectedAssetType { get; set; }
