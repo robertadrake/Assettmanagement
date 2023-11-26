@@ -7,7 +7,6 @@ public class AppDbContext : DbContext
         : base(options)
     {
     }
-
     public DbSet<Asset> Assets { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<AssetHistory> AssetHistories { get; set; }

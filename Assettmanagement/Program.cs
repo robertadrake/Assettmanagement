@@ -12,12 +12,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-// in the Json file ...builder.WebHost.UseUrls("http://*:5000", "https://*:5001");
-// Add services to the container.
-
-//builder.Services.AddTransient<AccessDatabase>();
-//builder.Services.AddTransient<IDataAccess>();
-
 builder.Logging.ClearProviders();
 builder.Logging.AddSimpleConsole(options =>
 {
@@ -32,23 +26,25 @@ builder.Services.AddRazorPages(options =>
 
 builder.Services.AddAuthorization(options =>
 {
-  //options.AddPolicy("SpecificUserOnly", policy => policy.RequireClaim(ClaimTypes.Name, "System"));
-    options.AddPolicy("AdministratorOnly", policy => policy.RequireClaim("IsAdministrator", "true"));
+   options.AddPolicy("AdministratorOnly", policy => policy.RequireClaim("IsAdministrator", "true"));
 });
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie();
 // setup the link for Entity framework
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("SqliteDatabase")));
+builder.Services.AddDbContext<AppDbContext>(options =>options.UseSqlite(builder.Configuration.GetConnectionString("SqlDatabase")));
 builder.Services.AddTransient<IDataAccess>();
 
 var app = builder.Build();
+// Initialize and seed the database
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<AppDbContext>();
+    context.Database.Migrate(); // This will apply any pending migrations and create the database
+}
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 string SipAddress = SecurityHelper.GetLocalIPAddress();
 logger.LogInformation($"Local IP Address is {SipAddress}.");
-// Create the database if it doesn't exist
-//var accessDatabase = app.Services.GetService<AccessDatabase>();
-//accessDatabase.CreateDatabaseIfNotExists();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
