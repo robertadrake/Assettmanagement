@@ -20,27 +20,25 @@ namespace Assettmanagement.Pages
             _dataAccess = dataAccess;
         }
         public List<Asset> Assets { get; set; }
-
+        [BindProperty]
+        public Dictionary<int, string> AssetUserNames { get; set; }
         public async Task<IActionResult> OnGetAsync()
         {
-            // needs to show either my assets or if admin then all the assets
-          //  if (User.HasClaim(ClaimTypes.Role, "Administrator"))
-//            {
-                //Assets = await _dataAccess.GetFilteredAssetsAsync(SelectedAssetType);
-            //}
-            //else
-            //{
-                var emailClaim = User.FindFirst(ClaimTypes.Email);
-                if (emailClaim == null)
-                {
-                    // Handle error - claim not found
-                    return Page();
-                }
-                var email = emailClaim.Value;
-                Assets = await _dataAccess.GetAssetsByUserEmailAsync(email, SelectedAssetType);
-            //}
+            var emailClaim = User.FindFirst(ClaimTypes.Email);
+            if (emailClaim == null)
+            {
+                // Handle error - claim not found
+                return Page();
+            }
+            var email = emailClaim.Value;
+
+            var assetsWithUserNames = await _dataAccess.GetAssetsByUserEmailAsync(email, SelectedAssetType);
+            Assets = assetsWithUserNames.Select(x => x.Asset).ToList();
+            AssetUserNames = assetsWithUserNames.ToDictionary(x => x.Asset.Id, x => x.UserName);
+
             return Page();
         }
+
 
     }
 }

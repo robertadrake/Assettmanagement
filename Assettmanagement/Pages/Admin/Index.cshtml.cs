@@ -5,6 +5,7 @@ using Assettmanagement.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace Assettmanagement.Pages.Admin
 {
@@ -17,6 +18,8 @@ namespace Assettmanagement.Pages.Admin
         {
             _dataAccess = dataAccess;
         }
+        [BindProperty]
+        public Dictionary<int, string> AssetUserNames { get; set; }
         [BindProperty(SupportsGet = true)]
         public string SelectedAssetType { get; set; } 
         public List<Asset> Assets { get; set; }
@@ -27,12 +30,17 @@ namespace Assettmanagement.Pages.Admin
         public int SelectedUserId { get; set; }
         [TempData]
         public string ResultMessage { get; set; }
+
+
         public async Task<IActionResult> OnGetAsync()
         {
-            Assets = await _dataAccess.GetFilteredAssetsAsync(SelectedAssetType);
+            var assetsWithUserNames = await _dataAccess.GetFilteredAssetsWithUserAsync(SelectedAssetType);
+            Assets = assetsWithUserNames.Select(x => x.Asset).ToList();
+            AssetUserNames = assetsWithUserNames.ToDictionary(x => x.Asset.Id, x => x.UserName);
             Users = await _dataAccess.GetUsersAsync();
             return Page();
         }
+
 
         public async Task<IActionResult> OnPostDeleteAssetAsync(int? SelectedAssetId)
         {

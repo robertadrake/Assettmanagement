@@ -60,16 +60,11 @@
                         <td style="width: 10%;">@asset.SerialNumber</td>
                         <td style="width: 10%;">@asset.AssetNumber</td>
                         <td style="width: 10%;">@asset.Location</td>
-                        <td style="width: 10%;">@asset.CalibrationDate</td>
+                        <td style="width: 10%;">@asset.CalibrationDate?.ToString("dd-MMM-yy")</td>
                         <td style="width: 15%;">
-                            @if (asset.User != null)
-                            {
-                                @asset.User.FirstName @asset.User.LastName
-                            }
-                            else
-                            {
-                                @:Not assigned
-                            }
+                        <tr>
+                            <td>@(Model.AssetUserNames.ContainsKey(asset.Id) ? Model.AssetUserNames[asset.Id] : "Unassigned")</td>
+                        </tr>
                         </td>
                         <td style="width: 5%;">
                             <form method="post" asp-page-handler="DeleteAsset">

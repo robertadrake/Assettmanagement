@@ -13,43 +13,39 @@ namespace Assettmanagement.Pages.Booking
     public class AddAssetHistoryModel : PageModel
     {
         private readonly IDataAccess _dataAccess;
-        public List<AssetHistory> AssetHistories { get; set; }
 
+        
         public AddAssetHistoryModel(IDataAccess dataAccess)
         {
             _dataAccess = dataAccess;
         }
-
+        
         [BindProperty]
         public AssetHistory AssetHistory { get; set; }
-        private async Task LoadAssetHistoriesAsync(int assetId)
-        {
-            AssetHistories = await _dataAccess.GetAssetHistoriesWithUsersAsync(assetId);
-        }
-
-        public async Task<IActionResult> OnGetLoadAssetHistoriesAsync(int assetId)
-        {
-            AssetHistories = await _dataAccess.GetAssetHistoriesWithUsersAsync(assetId);
-            return new JsonResult(AssetHistories);
-        }
-
+        public List<AssetHistory> AssetHistories { get; set; }
+        public List<AssetHistory_dto> AssetHistory_dtos { get; set; }
+        
         public async Task<IActionResult> OnGetAsync()
         {
             var assets = await _dataAccess.GetAssetsAsync();
             var users = await _dataAccess.GetUsersAsync();
+            var assetSelectListItems = assets.Select(a =>
+            new SelectListItem
+            {
+                Value = a.Id.ToString(),
+                Text = $"Name:{a.Name} Serial:{a.SerialNumber} Asset#:{a.AssetNumber}"
+            }).ToList();
 
-            ViewData["AssetList"] = new SelectList(assets, "Id", "Name");
-            ViewData["UserList"] = new SelectList(users, "Id", "FirstName");
+            TempData["AssetList"] = new SelectList(assetSelectListItems, "Value", "Text");
+            TempData["UserList"] = new SelectList(users, "Id", "FirstName");
 
             if (assets.Any())
             {
-                await LoadAssetHistoriesAsync(assets.First().Id);
+                await OnGetLoadAssetHistoriesAsync(assets.First().Id);
             }
 
             return Page();
         }
-
-
         public async Task<IActionResult> OnPostAsync()
         {
             ModelState.Remove("AssetHistory.Asset");
@@ -60,29 +56,79 @@ namespace Assettmanagement.Pages.Booking
             }
 
             AssetHistory.Timestamp = DateTime.UtcNow;
-
             try
             {
-                await _dataAccess.AddAssetHistoryAsync(AssetHistory);
-                ViewData["ResultMessage"] = "Asset history successfully added.";
-                ViewData["IsSuccess"] = true;
+                try
+                {
+                    await _dataAccess.AddAssetHistoryAsync(AssetHistory);
+                    TempData["ResultMessage"] = "Asset history successfully added.";
+                    TempData["IsSuccess"] = true;
+                }
+                catch (Exception ex)
+                {
+                    TempData["ResultMessage"] = $"Error adding asset history: {ex.Message}";
+                    TempData["IsSuccess"] = false;
+                }
+                // Refresh the asset and user lists
+                await OnGetAsync();
+                if (AssetHistory.AssetId != 0)
+                {
+                    try
+                    {
+                        var assetHistories = await _dataAccess.GetAssetHistoriesWithUsersAsync(AssetHistory.AssetId);
+                        var AssetHistory_dtos = assetHistories.Select(ah => new AssetHistory_dto
+                        {
+                            Id = ah.Id,
+                            UserName = ah.User != null ? $"{ah.User.FirstName} {ah.User.LastName}" : "N/A",
+                            Comment = ah.Comment != null ? $"{ah.Comment}" : "N/A",
+                            Timestamp = ah.Timestamp,
+                            // Map other properties
+                        }).ToList();
+                        TempData.Remove("ResultMessage");
+                        return new JsonResult(AssetHistory_dtos);
+                    }
+                    catch (Exception ex)
+                    {
+                        TempData["ResultMessage"] = $"Error reading asset history:{ex.Message}";
+                        TempData["IsSuccess"] = false;
+                        // Handle exception
+                        return BadRequest(ex.Message);
+                    }
+                }
             }
             catch (Exception ex)
             {
-                ViewData["ResultMessage"] = $"Error adding asset history: {ex.Message}";
-                ViewData["IsSuccess"] = false;
+                // Log the exception
+                Console.WriteLine($"Error in OnPostAsync {ex}"); // Assuming you have a logger
+
+                // Return a detailed error message for debugging
+                return BadRequest("An error occurred: " + ex.Message);
             }
-            if (AssetHistory.AssetId != 0)
+            return BadRequest();
+        }
+        public async Task<IActionResult> OnGetLoadAssetHistoriesAsync(int assetId)
+        {
+            try
             {
-                await LoadAssetHistoriesAsync(AssetHistory.AssetId);
+                var assetHistories = await _dataAccess.GetAssetHistoriesWithUsersAsync(assetId);
+                var AssetHistory_dtos = assetHistories.Select(ah => new AssetHistory_dto
+                {
+                    Id = ah.Id,
+                    UserName = ah.User != null ? $"{ah.User.FirstName} {ah.User.LastName}" : "N/A",
+                    Comment = ah.Comment != null ? $"{ah.Comment}" : "N/A",
+                    Timestamp = ah.Timestamp,
+                    // Map other properties
+                }).ToList();
+                TempData.Remove("ResultMessage");
+                return new JsonResult(AssetHistory_dtos);
             }
-            // Reset the form values
-            AssetHistory = new AssetHistory();
-
-            // Refresh the asset and user lists
-            await OnGetAsync();
-
-            return Page();
+            catch (Exception ex)
+            {
+                TempData["ResultMessage"] = $"Error reading asset history:{ex.Message}";
+                TempData["IsSuccess"] = false;
+                // Handle exception
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

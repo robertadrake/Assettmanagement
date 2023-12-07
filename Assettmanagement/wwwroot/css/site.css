@@ -16,3 +16,35 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.col-type {
+    width: 25%;
+}
+
+.col-name {
+    width: 10%;
+}
+
+.col-description {
+    width: 20%;
+}
+
+.col-serial-number {
+    width: 10%;
+}
+
+.col-asset-number {
+    width: 10%;
+}
+
+.col-location {
+    width: 10%;
+}
+
+.col-calibration {
+    width: 10%;
+}
+
+.col-assigned-to {
+    width: 10%;
+}

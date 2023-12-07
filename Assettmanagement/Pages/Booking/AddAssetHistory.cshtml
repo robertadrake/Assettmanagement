@@ -6,65 +6,77 @@
 
 <h2>Add Asset History</h2>
 
-<form method="post">
+<form method="post" id="addAssetHistoryForm">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <div class="form-group">
         <label asp-for="AssetHistory.AssetId" class="control-label">Asset</label>
-        <select asp-for="AssetHistory.AssetId" class="form-control" asp-items="@(ViewData["AssetList"] as SelectList)">
+        <select asp-for="AssetHistory.AssetId" class="form-control" asp-items="@(TempData["AssetList"] as SelectList)">
         </select>
         <span asp-validation-for="AssetHistory.AssetId" class="text-danger"></span>
     </div>
 
     <div class="form-group">
         <label asp-for="AssetHistory.UserId" class="control-label">User</label>
-        <select asp-for="AssetHistory.UserId" class="form-control" asp-items="@(ViewData["UserList"] as SelectList)">
+        <select asp-for="AssetHistory.UserId" class="form-control" asp-items="@(TempData["UserList"] as SelectList)">
         </select>
         <span asp-validation-for="AssetHistory.UserId" class="text-danger"></span>
     </div>
 
     <div class="form-group">
         <label asp-for="AssetHistory.Comment" class="control-label">Comment</label>
-        <input asp-for="AssetHistory.Comment" class="form-control" />
+        <input asp-for="AssetHistory.Comment" class="form-control" id="commentField" />
         <span asp-validation-for="AssetHistory.Comment" class="text-danger"></span>
     </div>
 
     <button type="submit" class="btn btn-primary">Add Asset History</button>
 
-    @if (Model.AssetHistories != null && Model.AssetHistories.Count > 0)
+    @if (Model.AssetHistory_dtos != null && Model.AssetHistory_dtos.Count > 0)
     {
         <div id="history-section">
-        <h3>Asset History</h3>
             <table class="table">
                 <thead>
                     <tr>
                         <th>Timestamp</th>
-                        <th>User</th>
+                        <th>UserName</th>
                         <th>Comment</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var history in Model.AssetHistories)
+                    @foreach (var history in Model.AssetHistory_dtos)
                     {
                         <tr>
                             <td>@history.Timestamp.ToString("G")</td>
-                            <td>@history.User.FirstName @history.User.LastName</td>
+                            <td>@history.UserName</td>
                             <td>@history.Comment</td>
                         </tr>
                     }
                 </tbody>
             </table>
         </div>
-
+    } else
+    {
+        <div id="history-section">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>UserName</th>
+                        <th>Comment</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
     }
 </form>
 
-@if (!string.IsNullOrEmpty(ViewData["ResultMessage"] as string))
+@if (TempData["ResultMessage"] != null)
 {
-    <div class="alert @(ViewData["IsSuccess"] as bool? == true ? "alert-success" : "alert-danger") mt-3">
-        @ViewData["ResultMessage"]
+    <div class="alert @(TempData["IsSuccess"] as bool? == true ? "alert-success" : "alert-danger") mt-3">
+        @TempData["ResultMessage"].ToString()
     </div>
 }
+
 
 @section Scripts {
     @{
@@ -87,13 +99,17 @@
                     </tr>
                 </thead>
                 <tbody>`;
-            data.forEach(history => {
-                historyHtml += `<tr>
+            if (Array.isArray(data)){
+                data.forEach(history => {
+                    historyHtml += `<tr>
                     <td>${new Date(history.timestamp).toLocaleString()}</td>
-                    <td>${history.user.firstName} ${history.user.lastName}</td>
+                    <td>${history.userName}</td>
                     <td>${history.comment}</td>
                 </tr>`;
-            });
+                });
+            } else {
+                console.error('Expected an array but not recieved', data);
+            }
             historyHtml += "</tbody></table>";
             historySection.innerHTML = historyHtml;
         }
@@ -107,6 +123,29 @@
             } else {
                 updateHistorySection([]);
             }
+        });
+
+        document.getElementById("addAssetHistoryForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            var formData = new FormData(this);
+
+            fetch(this.action, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text || 'Response not OK') });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    updateHistorySection(data); // Update your asset history table
+
+                    document.getElementById("commentField").value = "";
+                })
+                .catch(error => console.error('Error:', error));
         });
 
     </script>

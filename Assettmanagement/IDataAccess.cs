@@ -93,9 +93,9 @@ namespace Assettmanagement.Data
             return await query.Where(a => a.UserId == null).ToListAsync();
         }
 
-        public async Task<List<Asset>> GetAssignedAssetsAsync(string assetType)
+      /*  public async Task<List<Asset>> GetAssignedAssetsAsync(string assetType)
         {
-            var query = _context.Assets.Include(a => a.User).AsQueryable();
+            var query = _context.Assets.Include(a => a.UserId).AsQueryable();
 
             if (!string.IsNullOrEmpty(assetType))
             {
@@ -104,6 +104,22 @@ namespace Assettmanagement.Data
 
             return await query.Where(a => a.UserId != null).ToListAsync();
         }
+      */
+        public async Task<List<Asset>> GetAssignedAssetsAsync(string assetType)
+        {
+            var query = _context.Assets.AsQueryable();
+
+            if (!string.IsNullOrEmpty(assetType))
+            {
+                query = query.Where(a => a.AssetType == assetType);
+            }
+
+            // Include the User navigation property if it exists in your model
+            // query = query.Include(a => a.User);
+
+            return await query.Where(a => a.UserId != null).ToListAsync();
+        }
+
 
         public async Task AssignAssetToUserAsync(int assetId, int userId)
         {
@@ -132,6 +148,22 @@ namespace Assettmanagement.Data
                                  .ToListAsync();
         }
 
+        public async Task<List<AssetWithUserName_dto>> GetFilteredAssetsWithUserAsync(string assetType)
+        {
+            var assetsWithUser = await _context.Assets
+                .Select(a => new AssetWithUserName_dto
+                {
+                    Asset = a,
+                    UserName = a.UserId.HasValue
+                        ? _context.Users.Where(u => u.Id == a.UserId.Value)
+                                        .Select(u => u.FirstName + " " + u.LastName)
+                                        .FirstOrDefault()
+                        : "Unassigned"
+                })
+                .ToListAsync();
+
+            return assetsWithUser;
+        }
 
 
         ///**********************************
@@ -171,11 +203,10 @@ namespace Assettmanagement.Data
 
             return systemUser;
         }
-        public async Task<List<Asset>> GetAssetsByUserEmailAsync(string email, string assetType)
+      /*  public async Task<List<Asset>> GetAssetsByUserEmailAsync(string email, string assetType)
         {
             var query = _context.Assets
-                                .Include(a => a.User)
-                                .Where(a => a.User.Email == email);
+                                .Where(a => a.UserId.HasValue && _context.Users.Any(u => u.Id == a.UserId.Value && u.Email == email));
 
             if (!string.IsNullOrEmpty(assetType))
             {
@@ -183,11 +214,30 @@ namespace Assettmanagement.Data
             }
 
             return await query.ToListAsync();
+        }*/
+
+        public async Task<List<AssetWithUserName_dto>> GetAssetsByUserEmailAsync(string email, string assetType)
+        {
+            var assetsWithUserNames = await _context.Assets
+                .Where(a => a.UserId.HasValue && _context.Users.Any(u => u.Id == a.UserId.Value && u.Email == email))
+                .Select(a => new AssetWithUserName_dto
+                {
+                    Asset = a,
+                    UserName = a.UserId.HasValue
+                        ? _context.Users.Where(u => u.Id == a.UserId.Value)
+                                        .Select(u => u.FirstName + " " + u.LastName)
+                                        .FirstOrDefault()
+                        : "Unassigned"
+                })
+                .ToListAsync();
+
+            return assetsWithUserNames;
         }
+
 
         public async Task<List<Asset>> GetFilteredAssetsAsync(string assetType)
         {
-            IQueryable<Asset> query = _context.Assets.Include(a => a.User);
+            IQueryable<Asset> query = _context.Assets.Include(a => a.UserId);
 
             if (!string.IsNullOrEmpty(assetType))
             {

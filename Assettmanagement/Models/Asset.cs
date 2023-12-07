@@ -16,7 +16,6 @@ namespace Assettmanagement.Models
         [MaxLength(10)] // Adjust the maximum length as needed
         public string SerialNumber { get; set; }
         [Required]
-       // [MaxLength(10)] // Adjust the maximum length as needed
         public int AssetNumber { get; set; }
         [Required]
         [MaxLength(100)] // Adjust the maximum length as needed
@@ -26,7 +25,7 @@ namespace Assettmanagement.Models
         public string AssetType { get; set; }
         // Navigation property for the User
         // This represents the relationship between Asset and User
-        public User User { get; set; }
+        //public User User { get; set; }
         // Foreign key for User
         // The '?' denotes that the UserId can be null (asset may not be assigned to a user)
         public int? UserId { get; set; }

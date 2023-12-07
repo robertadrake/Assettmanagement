@@ -4,13 +4,19 @@
     ViewData["Title"] = "Home";
 }
 
-<h1>Global Research and Development Assets</h1>
+<!--<h1>Global Research and Development Assets</h1>-->
 
 <style>
     .scrollable-table {
-        max-height: 400px;
-        overflow-y: auto;
-        display: block;
+        max-height:800px;
+        overflow-y:auto;
+        display: inline-block;
+        width:100%;
+    }
+
+    .scrollable-table .table {
+        width : 100%;
+        table-layout: fixed;
     }
 </style>
 
@@ -26,57 +32,35 @@
         </select>
     </div>
 </form>
-<div style="display: inline-block;">
-    <table class="table">
+    <div>
+        <table class="table">
         <thead>
             <tr>
-               <!-- <th style="width: 5%;">ID</th> !-->
-                <th style="width: 15%;">Type</th>
-                <th style="width: 15%;">Name</th>
-                <th style="width: 25%;">Description</th>
-                <th style="width: 10%;">Serial Number</th>
-                <th style="width: 10%;">Asset Number</th>
-                <th style="width: 10%;">Location</th>
-                <th style="width: 10%;">Calibration</th>
-                <!--<th style="width: 15%;">Assigned To</th> !-->
-              <!--  <th style="width: 5%;">Action</th> !-->
+                <th class="col-type">Type</th>
+                <th class="col-name">Name</th>
+                <th class="col-description">Description</th>
+                <th class="col-serial-number">Serial Number</th>
+                <th class="col-asset-number">Asset Number</th>
+                <th class="col-location">Location</th>
+                <th class="col-calibration">Calibration</th>
+                <!-- <th class="col-assigned-to">Assigned To</th> -->
             </tr>
         </thead>
-    </table>
-    <div class="scrollable-table">
-        <table class="table">
             <tbody>
                 @foreach (var asset in Model.Assets)
                 {
                     <tr>
-                      <!--  <td style="width: 5%;">@asset.Id</td> !-->
-                        <td style="width: 15%;">@asset.AssetType</td>
-                        <td style="width: 15%;"><a asp-page="./AssetHistory" asp-route-AssetId="@asset.Id">@asset.Name</a></td>
-                        <td style="width: 25%;">@asset.Description</td>
-                        <td style="width: 10%;">@asset.SerialNumber</td>
-                        <td style="width: 10%;">@asset.AssetNumber</td>
-                        <td style="width: 10%;">@asset.Location</td>
-                        <td style="width: 10%;">@asset.CalibrationDate</td>
-                        <!--<td style="width: 15%;">
-                            @if (asset.User != null)
-                            {
-                                @asset.User.FirstName @asset.User.LastName
-                            }
-                            else
-                            {
-                                @:Not assigned
-                            }
-                        </td> !-->
-                        <!-- <td style="width: 5%;">
-                            <form method="post" asp-page-handler="DeleteAsset">
-                                <input type="hidden" asp-for="SelectedAssetId" value="@asset.Id" />
-                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                            </form>
-                        </td> !-->
+                        <td class="col-type">@asset.AssetType</td>
+                        <td class="col-name"><a asp-page="./AssetHistory" asp-route-AssetId="@asset.Id">@asset.Name</a></td>
+                        <td class="col-description">@asset.Description</td>
+                        <td class="col-serial-number">@asset.SerialNumber</td>
+                        <td class="col-asset-number">@asset.AssetNumber</td>
+                        <td class="col-location">@asset.Location</td>
+                        <td class="col-calibration">@asset.CalibrationDate?.ToString("dd-MMM-yyyy")</td>
+                        <!-- <td class="col-assigned-to">@(Model.AssetUserNames.ContainsKey(asset.Id) ? Model.AssetUserNames[asset.Id] : "Unassigned")</td> -->
                     </tr>
                 }
             </tbody>
         </table>
     </div>
 </div>
-

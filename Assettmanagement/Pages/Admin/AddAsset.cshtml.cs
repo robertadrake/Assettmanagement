@@ -71,7 +71,9 @@ namespace Assettmanagement.Pages.Admin
                     AssetType = Asset.AssetType,
                     SerialNumber =  Asset.SerialNumber,
                     AssetNumber = ((Asset.AssetNumber) + i),   // Increment asset number
-                    Location = Asset.Location
+                    Location = Asset.Location,
+                    CalibrationDate = Asset.CalibrationDate
+                    
                 };
 
                 await _dataAccess.AddAssetAsync(assetToAdd);

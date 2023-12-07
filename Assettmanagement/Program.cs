@@ -24,6 +24,15 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AuthorizeFolder("/");
 });
 
+/*You can configure the JSON serializer to handle circular references. 
+ * This is done by setting ReferenceHandler.Preserve in the JsonSerializerOptions. 
+ * However, this approach can lead to complex and large JSON structures, which might not be ideal.
+ * */
+/*builder.Services.AddControllersWithViews().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+});*/
+
 builder.Services.AddAuthorization(options =>
 {
    options.AddPolicy("AdministratorOnly", policy => policy.RequireClaim("IsAdministrator", "true"));
